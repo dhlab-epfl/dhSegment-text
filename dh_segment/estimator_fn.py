@@ -34,6 +34,7 @@ def model_fn(mode, features, labels, params):
 
             def init_fn(scaffold, session):
                 pretrained_restorer.restore(session, pretrained_file)
+                tf.logging.info("Restored %d with %d variables" % (pretrained_file, len(pretrained_vars)))
         else:
             init_fn = None
     else:
@@ -186,7 +187,8 @@ def model_fn(mode, features, labels, params):
     # ----------
     if mode == tf.estimator.ModeKeys.EVAL:
         if prediction_type == PredictionType.CLASSIFICATION:
-            metrics = {'eval/accuracy': tf.metrics.accuracy(labels, predictions=prediction_labels)}
+            metrics = {'eval/accuracy': tf.metrics.accuracy(labels, predictions=prediction_labels),
+                       'eval/mIoU': tf.metrics.mean_iou(labels, predictions=prediction_labels, num_classes=model.params.n_classes)}
         elif prediction_type == PredictionType.REGRESSION:
             metrics = {'eval/accuracy': tf.metrics.mean_squared_error(labels, predictions=prediction_labels)}
         elif prediction_type == PredictionType.MULTILABEL:

@@ -91,7 +91,7 @@ def run(train_data, eval_data, model_output_dir, gpu, training_params, _config):
         eval_input, eval_labels_input = get_dirs_or_files(eval_data)
 
     # Configure exporter
-    serving_input_fn = io.input.serving_input_filename(training_params.input_resized_size)
+    serving_input_fn = input.serving_input_filename(training_params.input_resized_size)
     exporter = tf.estimator.BestExporter(serving_input_receiver_fn=serving_input_fn, exports_to_keep=2)
 
     #if eval_data is not None:
@@ -107,7 +107,7 @@ def run(train_data, eval_data, model_output_dir, gpu, training_params, _config):
         num_threads = 4
 
     for i in trange(0, training_params.n_epochs, training_params.evaluate_every_epoch, desc='Evaluated epochs'):
-        estimator.train(io.input.input_fn(train_input,
+        estimator.train(input.input_fn(train_input,
                                           input_label_dir=train_labels_input,
                                           num_epochs=training_params.evaluate_every_epoch,
                                           batch_size=training_params.batch_size,
@@ -119,7 +119,7 @@ def run(train_data, eval_data, model_output_dir, gpu, training_params, _config):
                                           progressbar_description="Training".format(i)))
 
         if eval_data is not None:
-            eval_result = estimator.evaluate(io.input.input_fn(eval_input,
+            eval_result = estimator.evaluate(input.input_fn(eval_input,
                                                                input_label_dir=eval_labels_input,
                                                                batch_size=1,
                                                                data_augmentation=False,

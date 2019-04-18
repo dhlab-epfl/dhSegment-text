@@ -11,7 +11,7 @@ setup(name='dh_segment_text',
           'Paper': 'https://arxiv.org/abs/1804.10371',
           'Source Code': 'https://github.com/dhlab-epfl/dhSegment'
       },
-      scripts=['dh_segment_train'],
+      scripts=['dh_segment_train.py'],
       install_requires=[
         'tensorflow-gpu==1.13.1',
         'numpy==1.16.2',

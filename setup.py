@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from setuptools import setup, find_packages
 
-setup(name='dh_segment',
+setup(name='dh_segment_text',
       version='0.4.0',
       license='GPL',
       url='https://github.com/dhlab-epfl/dhSegment',

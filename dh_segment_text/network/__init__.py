@@ -1,7 +1,10 @@
 _MODEL = [
     'Encoder',
     'Decoder',
-    'SimpleDecoder',
+]
+
+_SIMPLEDECODER = [
+    'SimpleDecoder'
 ]
 
 _PRETRAINED = [
@@ -11,4 +14,5 @@ _PRETRAINED = [
 __all__ = _MODEL + _PRETRAINED
 
 from .model import *
+from .simple_decoder import *
 from .pretrained_models import *

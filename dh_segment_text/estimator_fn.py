@@ -9,6 +9,7 @@ def model_fn(mode, features, labels, params):
     training_params = TrainingParams.from_dict(params['training_params'])
     prediction_type = params['prediction_type']
     classes_file = params['classes_file']
+    use_embeddings = params['use_embeddings']
 
     input_images = features['images']
 
@@ -23,8 +24,16 @@ def model_fn(mode, features, labels, params):
     decoder = decoder_class(**model_params.decoder_params)
 
     is_training = (mode == tf.estimator.ModeKeys.TRAIN)
-    feature_maps = encoder(input_images, is_training=is_training)
-    network_output = decoder(feature_maps, num_classes=model_params.n_classes, is_training=is_training)
+    if not use_embeddings:
+        feature_maps = encoder(input_images, is_training=is_training)
+        network_output = decoder(feature_maps, num_classes=model_params.n_classes, is_training=is_training)
+    else:
+        input_embeddings = features['embeddings']
+        input_embeddings_map = features['embeddings_map']
+
+        feature_maps = encoder(input_images, is_training=is_training, embeddings=input_embeddings, embeddings_map=input_embeddings_map)
+        network_output = decoder(feature_maps, num_classes=model_params.n_classes, is_training=is_training, embeddings=input_embeddings, embeddings_map=input_embeddings_map)
+
 
     if mode == tf.estimator.ModeKeys.TRAIN:
         pretrained_file, pretrained_vars = encoder.pretrained_information()
@@ -34,7 +43,7 @@ def model_fn(mode, features, labels, params):
 
             def init_fn(scaffold, session):
                 pretrained_restorer.restore(session, pretrained_file)
-                tf.logging.info("Restored %d with %d variables" % (pretrained_file, len(pretrained_vars)))
+                tf.logging.info(f"Restored {pretrained_file} with {len(pretrained_vars)} variables")
         else:
             init_fn = None
     else:

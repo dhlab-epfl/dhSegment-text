@@ -7,8 +7,8 @@ from logging import WARNING  # import  DEBUG, INFO, ERROR for more/less verbosit
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'  # or any {'0', '1', '2'}
 tf.logging.set_verbosity(WARNING)
-from dh_segment import estimator_fn, utils
-from dh_segment.io import input
+from dh_segment_text import estimator_fn, utils
+from dh_segment_text.io import input
 import json
 
 try:
@@ -30,6 +30,8 @@ def default_config():
     restore_model = False  # Set to true to continue training
     classes_file = None  # txt file with classes values (unused for REGRESSION)
     gpu = ''  # GPU to be used for training
+    use_embeddings = False
+    embeddings_dim = 8
     prediction_type = utils.PredictionType.CLASSIFICATION  # One of CLASSIFICATION, REGRESSION or MULTILABEL
     model_params = utils.ModelParams().to_dict()  # Model parameters
     training_params = utils.TrainingParams().to_dict()  # Training parameters

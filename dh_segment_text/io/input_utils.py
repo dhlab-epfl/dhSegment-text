@@ -1,6 +1,7 @@
 import tensorflow as tf
+import os
 from tensorflow.contrib.image import rotate as tf_rotate
-from scipy import ndimage
+from scipy import ndimage, sparse
 import numpy as np
 from typing import Tuple
 
@@ -182,3 +183,19 @@ def local_entropy(tf_binary_img: tf.Tensor, sigma: float=3) -> tf.Tensor:
     local_components_avg = tf.pow(local_components_avg, 1 / 1.4)
     local_components_avg = local_components_avg / (tf.reduce_sum(local_components_avg, axis=2, keep_dims=True) + 1e-6)
     return -tf.reduce_sum(local_components_avg * tf.log(local_components_avg + 1e-6), axis=2)
+
+def load_embeddings(embeddings_filename, embeddings_map_filename, embeddings_size=300):
+    def load_embeddings(embeddings_filename, embeddings_map_filename):
+        embeddings_filename = embeddings_filename.decode('utf8')
+        embeddings_map_filename = embeddings_map_filename.decode('utf8')
+        if os.path.exists(embeddings_filename):
+            embeddings = np.load(embeddings_filename).astype(np.float32)
+            embeddings_map = sparse.load_npz(embeddings_map_filename).toarray().astype(np.int32)
+        else:
+            embeddings = np.zeros((1,embeddings_size), dtype=np.float32)
+            embeddings_map = np.zeros((200,200), dtype=np.int32)
+        return embeddings, embeddings_map
+    embeddings, embeddings_map = tf.py_func(load_embeddings, [embeddings_filename, embeddings_map_filename], (tf.float32, tf.int32))
+    embeddings.set_shape([None, embeddings_size])
+    return embeddings, embeddings_map
+

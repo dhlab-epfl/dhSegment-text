@@ -8,7 +8,7 @@ from typing import Union, List
 from enum import Enum
 import pandas as pd
 from .input_utils import data_augmentation_fn, extract_patches_fn, load_and_resize_image, \
-    rotate_crop, resize_image, local_entropy
+    rotate_crop, resize_image, local_entropy, load_embeddings
 
 
 class InputCase(Enum):
@@ -39,6 +39,7 @@ def input_fn(input_data: Union[str, List[str]], params: dict, input_label_dir: s
     training_params = utils.TrainingParams.from_dict(params['training_params'])
     prediction_type = params['prediction_type']
     classes_file = params['classes_file']
+    embeddings_dim = params['embeddings_dim']
 
     # --- Map functions
     def _make_patches_fn(input_image: tf.Tensor, label_image: tf.Tensor, offsets: tuple) -> (tf.Tensor, tf.Tensor):
@@ -47,6 +48,16 @@ def input_fn(input_data: Union[str, List[str]], params: dict, input_label_dir: s
             patches_label = extract_patches_fn(label_image, training_params.patch_shape, offsets)
 
             return patches_image, patches_label
+
+    # Load when no label and embeddings
+    def _load_no_label_embeddings(image_filename, embeddings_filename, embeddings_map_filename):
+        embeddings, embeddings_map = load_embeddings(embeddings_filename, embeddings_map_filename)
+        return {
+            "images": load_and_resize_image(image_filename, 3, training_params.input_resized_size),
+            "embeddings": embeddings,
+            "embeddings_map": embeddings_map
+        }
+
 
     # Load and resize images
     def _load_image_fn(image_filename, label_filename):
@@ -151,14 +162,20 @@ def input_fn(input_data: Union[str, List[str]], params: dict, input_label_dir: s
             label_image_filenames.append(label_image_filename)
         has_labelled_data = True
 
+    has_embeddings_data = False
     # Read image filenames and labels in case of csv file
     if input_case == InputCase.INPUT_CSV:
-        df = pd.read_csv(input_data, header=None, names=['images', 'labels'])
-        input_image_filenames = list(df.images.values)
+        df = pd.read_csv(input_data, header=None)
+        input_image_filenames = list(df.iloc[:,0].values)
         # If the label column exists
-        if not np.alltrue(pd.isnull(df.labels.values)):
-            label_image_filenames = list(df.labels.values)
+        if not np.alltrue(pd.isnull(df.iloc[:,1].values)):
+            label_image_filenames = list(df.iloc[:,1].values)
             has_labelled_data = True
+        if len(df.columns) == 4: #and not np.alltrue(pd.isnull(df.iloc[:,2].values)) and not np.alltrue(pd.isnull(df.iloc[:,3].values)):
+            df.fillna("", inplace=True)
+            embeddings_filenames = list(df.iloc[:, 2].values)
+            embeddings_map_filenames = list(df.iloc[:, 3].values)
+            has_embeddings_data = True
 
     # Checks that all image files can be found
     for img_filename in input_image_filenames:
@@ -168,28 +185,115 @@ def input_fn(input_data: Union[str, List[str]], params: dict, input_label_dir: s
         for label_filename in label_image_filenames:
             if not os.path.exists(label_filename):
                 raise FileNotFoundError(label_filename)
+    #if has_embeddings_data:
+    #    for embeddings_filename in embeddings_filenames:
+    #        if not os.path.exists(embeddings_filename):
+    #            raise FileNotFoundError(embeddings_filename)
+    #    for embeddings_map_filename in embeddings_map_filenames:
+    #        if not os.path.exists(embeddings_map_filename):
+    #            raise FileNotFoundError(embeddings_map_filename)
 
     # Tensorflow input_fn
+
+    def _load_image_embeddings_fn(image_filename, embeddings_filename, embeddings_map_filename, label_filename):
+        if training_params.data_augmentation and training_params.input_resized_size > 0:
+            random_scaling = tf.random_uniform([],
+                                               np.maximum(1 - training_params.data_augmentation_max_scaling, 0),
+                                               1 + training_params.data_augmentation_max_scaling)
+            new_size = training_params.input_resized_size * random_scaling
+        else:
+            new_size = training_params.input_resized_size
+        if prediction_type in [utils.PredictionType.CLASSIFICATION, utils.PredictionType.MULTILABEL]:
+            label_image = load_and_resize_image(label_filename, 3, new_size, interpolation='NEAREST')
+        elif prediction_type == utils.PredictionType.REGRESSION:
+            label_image = load_and_resize_image(label_filename, 1, new_size, interpolation='NEAREST')
+        else:
+            raise NotImplementedError
+        input_image = load_and_resize_image(image_filename, 3, new_size)
+
+        embeddings, embeddings_map = load_embeddings(embeddings_filename, embeddings_map_filename, embeddings_dim)
+
+        embeddings_map.set_shape([None, None])
+
+        #if data_augmentation:
+        #    # Rotation of the original image
+        #    if training_params.data_augmentation_max_rotation > 0:
+        #        with tf.name_scope('random_rotation'):
+        #            rotation_angle = tf.random_uniform([],
+        #                                               -training_params.data_augmentation_max_rotation,
+        #                                               training_params.data_augmentation_max_rotation)
+        #            label_image = rotate_crop(label_image, rotation_angle,
+        #                                      minimum_shape=[(i * 3) // 2 for i in training_params.patch_shape],
+        #                                      interpolation='NEAREST')
+        #            embeddings_map = rotate_crop(tf.expand_dims(embeddings_map, 0), rotation_angle,
+        #                                         minimum_shape=[(i * 3) // 2 for i in training_params.patch_shape],
+        #                                         interpolation='NEAREST')
+        #            embeddings_map = embeddings_map[1:]
+        #            input_image = rotate_crop(input_image, rotation_angle,
+        #                                      minimum_shape=[(i * 3) // 2 for i in training_params.patch_shape],
+        #                                      interpolation='BILINEAR')
+        return input_image, embeddings, embeddings_map, label_image
+
+    def _assign_color_to_class_id_embeddings(input_image, embeddings, embeddings_map, label_image):
+        # Convert RGB to class id
+        if prediction_type == utils.PredictionType.CLASSIFICATION:
+            label_image = utils.label_image_to_class(label_image, classes_file)
+        elif prediction_type == utils.PredictionType.MULTILABEL:
+            label_image = utils.multilabel_image_to_class(label_image, classes_file)
+        output = {'images': input_image,
+                  'embeddings': embeddings,
+                  'embeddings_map': embeddings_map,
+                  'labels': label_image}
+
+        if training_params.local_entropy_ratio > 0 and prediction_type == utils.PredictionType.CLASSIFICATION:
+            output['weight_maps'] = local_entropy(tf.equal(label_image, 1),
+                                                  sigma=training_params.local_entropy_sigma)
+        return output
+
+
+
     def fn():
         if not has_labelled_data:
-            encoded_filenames = [f.encode() for f in input_image_filenames]
-            dataset = tf.data.Dataset.from_generator(lambda: tqdm(encoded_filenames, desc=progressbar_description),
-                                                     tf.string, tf.TensorShape([]))
-            dataset = dataset.repeat(count=num_epochs)
-            dataset = dataset.map(lambda filename: {'images': load_and_resize_image(filename, 3,
-                                                                                    training_params.input_resized_size)})
+            if not has_embeddings_data:
+                encoded_filenames = [f.encode() for f in input_image_filenames]
+                dataset = tf.data.Dataset.from_generator(lambda: tqdm(encoded_filenames, desc=progressbar_description),
+                                                         tf.string, tf.TensorShape([]))
+                dataset = dataset.repeat(count=num_epochs)
+                dataset = dataset.map(lambda filename: {
+                    'images': load_and_resize_image(filename, 3,
+                                                    training_params.input_resized_size)})
+            else:
+                encoded_filenames = [(f.encode(), e.encode(), m.encode())for f, e, m in zip(input_image_filenames, embeddings_filenames, embeddings_map_filenames)]
+                dataset = tf.data.Dataset.from_generator(lambda: tqdm(encoded_filenames, desc=progressbar_description),
+                                                         (tf.string, tf.string, tf.string), tf.TensorShape([]))
+                dataset = dataset.repeat(count=num_epochs)
+                dataset = dataset.map(_load_no_label_embeddings, num_threads)
+
         else:
-            encoded_filenames = [(i.encode(), l.encode()) for i, l in zip(input_image_filenames, label_image_filenames)]
-            dataset = tf.data.Dataset.from_generator(lambda: tqdm(utils.shuffled(encoded_filenames),
-                                                                  desc=progressbar_description),
-                                                     (tf.string, tf.string), (tf.TensorShape([]), tf.TensorShape([])))
+            if not has_embeddings_data:
+                encoded_filenames = [(i.encode(), l.encode()) for i, l in zip(input_image_filenames, label_image_filenames)]
+                dataset = tf.data.Dataset.from_generator(lambda: tqdm(utils.shuffled(encoded_filenames),
+                                                                      desc=progressbar_description),
+                                                         (tf.string, tf.string), (tf.TensorShape([]), tf.TensorShape([])))
 
-            dataset = dataset.repeat(count=num_epochs)
-            dataset = dataset.map(_load_image_fn, num_threads).flat_map(_scaling_and_patch_fn)
+                dataset = dataset.repeat(count=num_epochs)
+                dataset = dataset.map(_load_image_fn, num_threads).flat_map(_scaling_and_patch_fn)
 
-            if data_augmentation:
-                dataset = dataset.map(_augment_data_fn, num_threads)
-            dataset = dataset.map(_assign_color_to_class_id, num_threads)
+                if data_augmentation:
+                    dataset = dataset.map(_augment_data_fn, num_threads)
+                dataset = dataset.map(_assign_color_to_class_id, num_threads)
+            else:
+                encoded_filenames = [(f.encode(), e.encode(), m.encode(), l.encode()) for f, e, m, l in zip(input_image_filenames, embeddings_filenames, embeddings_map_filenames, label_image_filenames)]
+                dataset = tf.data.Dataset.from_generator(lambda: tqdm(utils.shuffled(encoded_filenames),
+                                                                      desc=progressbar_description),
+                                                         (tf.string, tf.string, tf.string, tf.string), (tf.TensorShape([]), tf.TensorShape([]), tf.TensorShape([]), tf.TensorShape([])))
+                dataset = dataset.repeat(count=num_epochs)
+
+                dataset = dataset.map(_load_image_embeddings_fn, num_threads)
+                dataset = dataset.map(_assign_color_to_class_id_embeddings, num_threads)
+
+
+
 
         # Save original size of images
         dataset = dataset.map(lambda d: {'shapes': tf.shape(d['images'])[:2], **d})
@@ -205,7 +309,9 @@ def input_fn(input_data: Union[str, List[str]], params: dict, input_label_dir: s
         # Pad things
         padded_shapes = {
             'images': base_shape_images + [3],
-            'shapes': [2]
+            'embeddings_map': [-1, -1], #TODO harcoded padding shape
+            'embeddings': [-1, embeddings_dim],
+            'shapes': [2],
         }
         if 'labels' in dataset.output_shapes.keys():
             output_shapes_label = dataset.output_shapes['labels']
@@ -242,10 +348,15 @@ def input_fn(input_data: Union[str, List[str]], params: dict, input_label_dir: s
     return fn
 
 
-def serving_input_filename(resized_size):
+def serving_input_filename(resized_size, use_embeddings=True):
     def serving_input_fn():
         # define placeholder for filename
         filename = tf.placeholder(dtype=tf.string)
+
+        if use_embeddings:
+            # define placeholder for embeddings
+            embeddings_filename = tf.placeholder(dtype=tf.string)
+            embeddings_map_filename = tf.placeholder(dtype=tf.string)
 
         # TODO : make it batch-compatible (with Dataset or string input producer)
         decoded_image = tf.to_float(tf.image.decode_jpeg(tf.read_file(filename), channels=3,
@@ -257,8 +368,16 @@ def serving_input_filename(resized_size):
         else:
             image = decoded_image
 
+
         image_batch = image[None]
-        features = {'images': image_batch, 'original_shape': original_shape}
+        if use_embeddings:
+            embeddings, embeddings_map = load_embeddings(embeddings_filename, embeddings_map_filename)
+            features = {
+                'images': image_batch, 'original_shape': original_shape,
+                'embeddings': embeddings, 'embeddings_map': embeddings_map
+            }
+        else:
+            features = {'images': image_batch, 'original_shape': original_shape}
 
         receiver_inputs = {'filename': filename}
 

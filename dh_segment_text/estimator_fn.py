@@ -1,11 +1,12 @@
 import tensorflow as tf
-from .utils import PredictionType, ModelParams, TrainingParams, \
+from .utils import PredictionType, ModelParams, EmbeddingsParams, TrainingParams, \
     class_to_label_image, multiclass_to_label_image
 import numpy as np
 
 
 def model_fn(mode, features, labels, params):
     model_params = ModelParams(**params['model_params'])
+    embeddings_params = EmbeddingsParams(**params['embeddings_params'])
     training_params = TrainingParams.from_dict(params['training_params'])
     prediction_type = params['prediction_type']
     classes_file = params['classes_file']
@@ -31,8 +32,20 @@ def model_fn(mode, features, labels, params):
         input_embeddings = features['embeddings']
         input_embeddings_map = features['embeddings_map']
 
-        feature_maps = encoder(input_images, is_training=is_training, embeddings=input_embeddings, embeddings_map=input_embeddings_map)
-        network_output = decoder(feature_maps, num_classes=model_params.n_classes, is_training=is_training, embeddings=input_embeddings, embeddings_map=input_embeddings_map)
+        embeddings_encoder_class = embeddings_params.get_encoder()
+        embeddings_encoder = embeddings_encoder_class(target_dim=embeddings_params.target_dim, **embeddings_params.encoder_params)
+
+        feature_maps = encoder(input_images,
+                               is_training=is_training,
+                               embeddings_encoder=embeddings_encoder,
+                               embeddings=input_embeddings,
+                               embeddings_map=input_embeddings_map)
+        network_output = decoder(feature_maps,
+                                 num_classes=model_params.n_classes,
+                                 is_training=is_training,
+                                 embeddings_encoder=embeddings_encoder,
+                                 embeddings=input_embeddings,
+                                 embeddings_map=input_embeddings_map)
 
 
     if mode == tf.estimator.ModeKeys.TRAIN:

@@ -348,7 +348,7 @@ def input_fn(input_data: Union[str, List[str]], params: dict, input_label_dir: s
     return fn
 
 
-def serving_input_filename(resized_size, use_embeddings=True):
+def serving_input_filename(resized_size, use_embeddings=True, embeddings_dim=300):
     def serving_input_fn():
         # define placeholder for filename
         filename = tf.placeholder(dtype=tf.string)
@@ -371,7 +371,7 @@ def serving_input_filename(resized_size, use_embeddings=True):
 
         image_batch = image[None]
         if use_embeddings:
-            embeddings, embeddings_map = load_embeddings(embeddings_filename, embeddings_map_filename)
+            embeddings, embeddings_map = load_embeddings(embeddings_filename, embeddings_map_filename, embeddings_dim)
             features = {
                 'images': image_batch, 'original_shape': original_shape,
                 'embeddings': embeddings, 'embeddings_map': embeddings_map

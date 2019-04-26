@@ -4,6 +4,7 @@ __license__ = "GPL"
 
 from .misc import get_class_from_name
 from ..network.model import Encoder, Decoder
+from ..embeddings.encoder import EmbeddingsEncoder
 from typing import Type
 
 
@@ -81,6 +82,24 @@ class ModelParams(BaseParams):
     def check_params(self):
         self.get_encoder()
         self.get_decoder()
+
+class EmbeddingsParams(BaseParams):
+    def __init__(self, **kwargs):
+        self.target_dim = kwargs.get('target_dim', 8)
+        self.encoder_name = kwargs.get('embeddings_encoder', "dh_segment_text.embeddings.PCAEncoder")
+        self.encoder_params = kwargs.get('encoder_params', {
+            'pca_mean_path': "",
+            'pca_components_path': ""
+        })
+        self.check_params()
+
+    def get_encoder(self) -> Type[EmbeddingsEncoder]:
+        encoder = get_class_from_name(self.encoder_name)
+        assert issubclass(encoder, EmbeddingsEncoder), f"{encoder} is not an EmbeddingsEncoder"
+        return encoder
+
+    def check_params(self):
+        self.get_encoder()
 
 
 class TrainingParams(BaseParams):

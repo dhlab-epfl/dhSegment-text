@@ -150,10 +150,10 @@ def conv2d_same(inputs, num_outputs, kernel_size, stride, rate=1, scope=None):
 @add_arg_scope
 def stack_blocks_dense(net,
                        blocks,
+                       embeddings_encoder,
                        embeddings,
                        embeddings_map,
                        concat_level,
-                       embeddings_dim,
                        output_stride=None,
                        outputs_collections=None):
   """Stacks ResNet `Blocks` and controls output feature density.
@@ -205,12 +205,7 @@ def stack_blocks_dense(net,
   for block_idx, block in enumerate(blocks):
     if block_idx == concat_level:
         with variable_scope.variable_scope("Embeddings", values=[net]):
-          embeddings_map = tf.image.resize_nearest_neighbor(
-            tf.expand_dims(tf.expand_dims(embeddings_map, axis=0), axis=-1),
-            tf.shape(net)[1:3]
-          )
-          embeddings_features = tf.expand_dims(tf.gather_nd(embeddings, embeddings_map[0]), axis=0)
-          embeddings_features.set_shape([None, None, None, embeddings_dim])
+          embeddings_features = embeddings_encoder(embeddings, embeddings_map, tf.shape(net)[1:3])
           net = tf.concat([net, embeddings_features], axis=-1)
 
     with variable_scope.variable_scope(block.scope, 'block', [net]) as sc:

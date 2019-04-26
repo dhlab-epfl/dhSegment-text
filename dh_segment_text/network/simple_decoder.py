@@ -2,7 +2,8 @@ from .model import Decoder
 import tensorflow as tf
 from tensorflow.contrib import layers
 from tensorflow.contrib.slim import arg_scope
-from typing import List, Union, Tuple
+from ..embeddings.encoder import EmbeddingsEncoder
+from typing import List, Union, Tuple, Type
 
 class SimpleDecoder(Decoder):
     """
@@ -13,12 +14,11 @@ class SimpleDecoder(Decoder):
     :ivar self.batch_norm_fn:
     """
     def __init__(self, upsampling_dims: List[int], max_depth: int = None, weight_decay: float=0.,
-                 concat_level: int=-1, embeddings_dim: int=300):
+                 concat_level: int=-1):
         self.upsampling_dims = upsampling_dims
         self.max_depth = max_depth
         self.weight_decay = weight_decay
         self.concat_level = concat_level
-        self.embeddings_dim = embeddings_dim
 
         renorm = True
         self.batch_norm_params = {
@@ -27,7 +27,10 @@ class SimpleDecoder(Decoder):
             "renorm_momentum": 0.98
         }
 
-    def __call__(self, feature_maps: List[tf.Tensor], num_classes: int, is_training=False, embeddings: tf.Tensor=tf.zeros((1,300), dtype=tf.float32), embeddings_map: tf.Tensor=tf.zeros((200,200), dtype=tf.int32)):
+    def __call__(self, feature_maps: List[tf.Tensor], num_classes: int, is_training=False,
+                 embeddings_encoder: Type[EmbeddingsEncoder]=None,
+                 embeddings: tf.Tensor=tf.zeros((1,300), dtype=tf.float32),
+                 embeddings_map: tf.Tensor=tf.zeros((200,200), dtype=tf.int32)):
 
         batch_norm_fn = lambda x: tf.layers.batch_normalization(x, axis=-1, training=is_training,
                                                                 name='batch_norm', **self.batch_norm_params)
@@ -39,7 +42,7 @@ class SimpleDecoder(Decoder):
                            weights_regularizer=layers.l2_regularizer(self.weight_decay)):
 
                 assert len(self.upsampling_dims) + 1 == len(feature_maps), \
-                    'Upscaling : length of {} does not match {}'.format(len(self.upsampling_dims),
+                    'Upscaling : length of {} does net match {}'.format(len(self.upsampling_dims),
                                                                         len(feature_maps))
 
                 # Force layers to not be too big to reduce memory usage
@@ -60,11 +63,7 @@ class SimpleDecoder(Decoder):
                     out_tensor = _upsample_concat(out_tensor, f_map, scope_name='upsample_{}'.format(i))
                     if i == self.concat_level:
                         with tf.variable_scope('Embeddings'):
-                            embeddings_map = tf.image.resize_nearest_neighbor(
-                                tf.expand_dims(embeddings_map, axis=-1),
-                                tf.shape(out_tensor)[1:3]
-                            )
-                            embeddings_features = tf.expand_dims(tf.gather_nd(embeddings[0], embeddings_map[0]), axis=0)
+                            embeddings_features = embeddings_encoder(embeddings, embeddings_map, tf.shape(out_tensor)[1:3])
                             out_tensor = tf.concat([out_tensor, embeddings_features], axis=-1)
                     out_tensor = layers.conv2d(inputs=out_tensor,
                                                num_outputs=self.upsampling_dims[i],

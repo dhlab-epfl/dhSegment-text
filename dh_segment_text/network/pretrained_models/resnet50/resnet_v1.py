@@ -127,10 +127,10 @@ def bottleneck(inputs,
 
 def resnet_v1(inputs,
               blocks,
+              embeddings_encoder,
               embeddings,
               embeddings_map,
               concat_level,
-              embeddings_dim,
               num_classes=None,
               is_training=True,
               global_pool=True,
@@ -210,10 +210,10 @@ def resnet_v1(inputs,
           net = layers_lib.max_pool2d(net, [3, 3], stride=2, scope='pool1')
         net = stack_blocks_dense(net,
                                  blocks,
+                                 embeddings_encoder,
                                  embeddings,
                                  embeddings_map,
                                  concat_level,
-                                 embeddings_dim,
                                  output_stride)
         if global_pool:
           # Global average pooling.

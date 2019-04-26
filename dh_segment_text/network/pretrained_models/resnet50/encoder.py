@@ -7,6 +7,8 @@ from ....utils.misc import get_data_folder, download_file
 from ..vgg16 import mean_substraction
 from .resnet_v1 import resnet_arg_scope, bottleneck, resnet_v1_block, resnet_v1
 from .resnet_utils import Block
+from ....embeddings.encoder import EmbeddingsEncoder
+from typing import Type
 
 
 class ResnetV1_50(Encoder):
@@ -22,14 +24,13 @@ class ResnetV1_50(Encoder):
     """
     def __init__(self, train_batchnorm: bool=False, blocks: int=4, weight_decay: float=0.0001,
                  batch_renorm: bool=True, corrected_version: bool=False,
-                 concat_level: int=-1, embeddings_dim: int=300):
+                 concat_level: int=-1):
         self.train_batchnorm = train_batchnorm
         self.blocks = blocks
         self.weight_decay = weight_decay
         self.batch_renorm = batch_renorm
         self.corrected_version = corrected_version
         self.concat_level = concat_level
-        self.embeddings_dim = embeddings_dim
         self.pretrained_file = os.path.join(get_data_folder(), 'resnet_v1_50.ckpt')
         if not os.path.exists(self.pretrained_file):
             print("Could not find pre-trained file {}, downloading it!".format(self.pretrained_file))
@@ -47,7 +48,10 @@ class ResnetV1_50(Encoder):
                                       if 'resnet_v1_50' in v.name
                                       and 'renorm' not in v.name]
 
-    def __call__(self, images: tf.Tensor, is_training=False, embeddings: tf.Tensor=tf.zeros((1,300), dtype=tf.float32), embeddings_map: tf.Tensor=tf.zeros((200,200), dtype=tf.int32)):
+    def __call__(self, images: tf.Tensor, is_training=False,
+                 embeddings_encoder: Type[EmbeddingsEncoder]=None,
+                 embeddings: tf.Tensor=tf.zeros((1,300), dtype=tf.float32),
+                 embeddings_map: tf.Tensor=tf.zeros((200,200), dtype=tf.int32)):
         outputs = []
 
         with slim.arg_scope(resnet_arg_scope(weight_decay=self.weight_decay, batch_norm_decay=0.999)), \
@@ -106,10 +110,10 @@ class ResnetV1_50(Encoder):
                 ]
             net, endpoints = resnet_v1(mean_substracted_tensor,
                                        blocks=blocks_list[:self.blocks],
+                                       embeddings_encoder=embeddings_encoder,
                                        embeddings=embeddings,
                                        embeddings_map=embeddings_map,
                                        concat_level=self.concat_level,
-                                       embeddings_dim=self.embeddings_dim,
                                        num_classes=None,
                                        is_training=self.train_batchnorm and is_training,
                                        global_pool=False,

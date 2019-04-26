@@ -46,7 +46,7 @@ def default_config():
 
 
 @ex.automain
-def run(train_data, eval_data, model_output_dir, gpu, training_params, _config):
+def run(train_data, eval_data, model_output_dir, gpu, training_params, use_embeddings, _config):
     # Create output directory
     if not os.path.isdir(model_output_dir):
         os.makedirs(model_output_dir)
@@ -93,7 +93,7 @@ def run(train_data, eval_data, model_output_dir, gpu, training_params, _config):
         eval_input, eval_labels_input = get_dirs_or_files(eval_data)
 
     # Configure exporter
-    serving_input_fn = input.serving_input_filename(training_params.input_resized_size)
+    serving_input_fn = input.serving_input_filename(training_params.input_resized_size, use_embeddings=True)
     exporter = tf.estimator.BestExporter(serving_input_receiver_fn=serving_input_fn, exports_to_keep=2)
 
     #if eval_data is not None:

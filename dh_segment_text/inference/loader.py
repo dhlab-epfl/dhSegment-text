@@ -2,6 +2,7 @@ import tensorflow as tf
 import os
 from threading import Semaphore
 import numpy as np
+from scipy import sparse
 import tempfile
 from imageio import imsave, imread
 
@@ -61,7 +62,7 @@ class LoadedModel:
             del self._output_dict['original_shape']
         self.sema = Semaphore(num_parallel_predictions)
 
-    def predict(self, input_tensor, prediction_key=None):
+    def predict(self, input_tensor, embeddings_path=None, embeddings_map_path=None, prediction_key=None):
         """
         Performs the prediction from the loaded model according to the prediction mode. \n
         Prediction modes:
@@ -90,7 +91,17 @@ class LoadedModel:
                 desired_output = self._output_dict[prediction_key]
             else:
                 desired_output = self._output_dict
-            return self.sess.run(desired_output, feed_dict={self._input_tensor: input_tensor})
+            feed_dict = {self._input_tensor: input_tensor}
+            if embeddings_path and embeddings_map_path:
+                if os.path.exists(embeddings_path) and os.path.exists(embeddings_map_path):
+                    embeddings = np.load(embeddings_path)
+                    embeddings_map = sparse.load_npz(embeddings_map_path).toarray()
+                else:
+                    embeddings = np.zeros((1,300), dtype=np.float32)
+                    embeddings_map = np.zeros((200,200), dtype=np.int32)
+                feed_dict['PyFunc:0'] = embeddings
+                feed_dict['PyFunc:1'] = embeddings_map
+            return self.sess.run(desired_output, feed_dict=feed_dict)
 
     def predict_with_tiles(self, filename: str, resized_size: int=None, tile_size: int=500,
                            min_overlap: float=0.2, linear_interpolation: bool=True):

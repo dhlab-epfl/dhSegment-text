@@ -1,4 +1,5 @@
 from .encoder import EmbeddingsEncoder
+from .embeddings_utils import batch_resize_and_gather
 import tensorflow as tf
 import numpy as np
 
@@ -12,19 +13,9 @@ class PCAEncoder(EmbeddingsEncoder):
         with tf.variable_scope("PCAEncoder"):
             reduced_components = tf.transpose(self.pca_components[:self.target_dim])
             reduced_embeddings = tf.einsum('aij,jk->aik', (embeddings-self.pca_mean), reduced_components)
-            embeddings_map_reduced = tf.squeeze(
-                tf.image.resize_nearest_neighbor(
-                    tf.expand_dims(embeddings_map, axis=-1),
-                    target_shape
-                ), axis=-1)
-            with tf.variable_scope("BatchGather"):
-                b = tf.shape(embeddings_map_reduced)[0]
-                x = tf.shape(embeddings_map_reduced)[1]
-                y = tf.shape(embeddings_map_reduced)[2]
-                batches_range = tf.expand_dims(tf.expand_dims(tf.range(b), axis=-1), axis=-1)
-                batch_indices = tf.tile(batches_range, (1, x, y))
-                embeddings_map_indices = tf.stack([batch_indices, embeddings_map_reduced], axis=-1)
-                embeddings_feature_map = tf.gather_nd(reduced_embeddings, embeddings_map_indices)
-                embeddings_feature_map.set_shape([None, None, None, self.target_dim])
+            embeddings_feature_map = batch_resize_and_gather(embeddings_map,
+                                                             target_shape,
+                                                             reduced_embeddings)
+            embeddings_feature_map.set_shape([None, None, None, self.target_dim])
         return embeddings_feature_map
 

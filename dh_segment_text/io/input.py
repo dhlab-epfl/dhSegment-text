@@ -372,9 +372,11 @@ def serving_input_filename(resized_size, use_embeddings=True, embeddings_dim=300
         image_batch = image[None]
         if use_embeddings:
             embeddings, embeddings_map = load_embeddings(embeddings_filename, embeddings_map_filename, embeddings_dim)
+            embeddings_batch = tf.expand_dims(embeddings, axis=0)
+            embeddings_map_batch = tf.expand_dims(embeddings_map, axis=0)
             features = {
                 'images': image_batch, 'original_shape': original_shape,
-                'embeddings': embeddings, 'embeddings_map': embeddings_map
+                'embeddings': embeddings_batch, 'embeddings_map': embeddings_map_batch
             }
         else:
             features = {'images': image_batch, 'original_shape': original_shape}
@@ -383,6 +385,18 @@ def serving_input_filename(resized_size, use_embeddings=True, embeddings_dim=300
 
         input_from_resized_images = {'resized_images': image_batch}
         input_from_original_image = {'image': decoded_image}
+
+        if use_embeddings:
+            receiver_inputs['embeddings_filename'] = embeddings_filename
+            receiver_inputs['embeddings_map_filename'] = embeddings_map_filename
+
+            input_from_resized_images['embeddings_batch'] = embeddings_batch
+            input_from_resized_images['embeddings_map_batch'] = embeddings_map_batch
+
+            input_from_original_image['embeddings'] = embeddings
+            input_from_original_image['embeddings_map'] = embeddings_map
+
+
 
         return tf.estimator.export.ServingInputReceiver(features, receiver_inputs,
                                                         receiver_tensors_alternatives={'from_image':

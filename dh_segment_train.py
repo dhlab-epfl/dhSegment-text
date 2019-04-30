@@ -31,7 +31,7 @@ def default_config():
     classes_file = None  # txt file with classes values (unused for REGRESSION)
     gpu = ''  # GPU to be used for training
     use_embeddings = False
-    embeddings_dimension = 300
+    embeddings_dim = 300
     prediction_type = utils.PredictionType.CLASSIFICATION  # One of CLASSIFICATION, REGRESSION or MULTILABEL
     model_params = utils.ModelParams().to_dict()  # Model parameters
     embeddings_params = utils.EmbeddingsParams().to_dict() # Embeddings parameters
@@ -47,7 +47,7 @@ def default_config():
 
 
 @ex.automain
-def run(train_data, eval_data, model_output_dir, gpu, training_params, use_embeddings, embeddings_dimension, _config):
+def run(train_data, eval_data, model_output_dir, gpu, training_params, use_embeddings, embeddings_dim, _config):
     # Create output directory
     if not os.path.isdir(model_output_dir):
         os.makedirs(model_output_dir)
@@ -94,7 +94,7 @@ def run(train_data, eval_data, model_output_dir, gpu, training_params, use_embed
         eval_input, eval_labels_input = get_dirs_or_files(eval_data)
 
     # Configure exporter
-    serving_input_fn = input.serving_input_filename(training_params.input_resized_size, use_embeddings=use_embeddings, embeddings_dim=embeddings_dimension)
+    serving_input_fn = input.serving_input_filename(training_params.input_resized_size, use_embeddings=use_embeddings, embeddings_dim=embeddings_dim)
     exporter = tf.estimator.BestExporter(serving_input_receiver_fn=serving_input_fn, exports_to_keep=2)
 
     #if eval_data is not None:

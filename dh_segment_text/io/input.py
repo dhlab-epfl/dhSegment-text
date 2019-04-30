@@ -316,7 +316,7 @@ def input_fn(input_data: Union[str, List[str]], params: dict, input_label_dir: s
 
         if use_embeddings and has_embeddings_data:
             padded_shapes['embeddings_map'] = [-1, -1]
-            padded_shapes['embeddings'] = [-1, embeddings_dim],
+            padded_shapes['embeddings'] = [-1, embeddings_dim]
 
 
         if 'labels' in dataset.output_shapes.keys():

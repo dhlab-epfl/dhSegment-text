@@ -86,7 +86,7 @@ class ModelParams(BaseParams):
 class EmbeddingsParams(BaseParams):
     def __init__(self, **kwargs):
         self.target_dim = kwargs.get('target_dim', 8)
-        self.encoder_name = kwargs.get('embeddings_encoder', "dh_segment_text.embeddings.PCAEncoder")
+        self.encoder_name = kwargs.get('encoder_name', "dh_segment_text.embeddings.PCAEncoder")
         self.encoder_params = kwargs.get('encoder_params', {
             'pca_mean_path': "",
             'pca_components_path': ""

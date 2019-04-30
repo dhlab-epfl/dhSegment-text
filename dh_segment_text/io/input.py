@@ -307,19 +307,17 @@ def input_fn(input_data: Union[str, List[str]], params: dict, input_label_dir: s
             base_shape_images = list(training_params.patch_shape)
         else:
             base_shape_images = [-1, -1]
+
         # Pad things
         padded_shapes = {
             'images': base_shape_images + [3],
-            'embeddings_map': [-1, -1], #TODO harcoded padding shape
-            'embeddings': [-1, embeddings_dim],
             'shapes': [2],
         }
 
-        padding_values = {
-            'images': [[[255, 255, 255]]]
-        }
+        if use_embeddings and has_embeddings_data:
+            padded_shapes['embeddings_map'] = [-1, -1]
+            padded_shapes['embeddings'] = [-1, embeddings_dim],
 
-        padding_values = None
 
         if 'labels' in dataset.output_shapes.keys():
             output_shapes_label = dataset.output_shapes['labels']

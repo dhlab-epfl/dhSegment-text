@@ -151,6 +151,8 @@ class TrainingParams(BaseParams):
         self.evaluate_every_epoch = kwargs.get('evaluate_every_epoch', 10)
         self.learning_rate = kwargs.get('learning_rate', 1e-5)
         self.exponential_learning = kwargs.get('exponential_learning', True)
+        self.cosine_restart_learning = kwargs.get('cosine_restart_learning', False)
+        self.adamw_optimizer = kwargs.get('adamw_optimizer', False)
         self.batch_size = kwargs.get('batch_size', 5)
         self.data_augmentation = kwargs.get('data_augmentation', False)
         self.data_augmentation_flip_lr = kwargs.get('data_augmentation_flip_lr', False)

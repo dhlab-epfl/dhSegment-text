@@ -150,14 +150,20 @@ def model_fn(mode, features, labels, params):
         # tf.add_to_collection(tf.GraphKeys.UPDATE_OPS, ema.apply([loss]))
         # ema_loss = ema.average(loss)
 
-        if training_params.exponential_learning:
+        if training_params.cosine_restart_learning:
+            global_step = tf.train.get_or_create_global_step()
+            learning_rate = tf.train.cosine_decay_restarts(training_params.learning_rate, global_step, first_decay_steps=200)
+        elif training_params.exponential_learning:
             global_step = tf.train.get_or_create_global_step()
             learning_rate = tf.train.exponential_decay(training_params.learning_rate, global_step, decay_steps=200,
                                                        decay_rate=0.95, staircase=False)
         else:
             learning_rate = training_params.learning_rate
         tf.summary.scalar('learning_rate', learning_rate)
-        optimizer = tf.train.AdamOptimizer(learning_rate)
+        if training_params.adamw_optimizer:
+            optimizer = tf.contrib.opt.AdamWOptimzer(learning_rate=learning_rate, weight_decay=0.95)
+        else:
+            optimizer = tf.train.AdamOptimizer(learning_rate)
         with tf.control_dependencies(tf.get_collection(tf.GraphKeys.UPDATE_OPS)):
             train_op = optimizer.minimize(loss, global_step=tf.train.get_or_create_global_step())
     else:

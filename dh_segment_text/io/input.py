@@ -39,6 +39,7 @@ def input_fn(input_data: Union[str, List[str]], params: dict, input_label_dir: s
     training_params = utils.TrainingParams.from_dict(params['training_params'])
     prediction_type = params['prediction_type']
     classes_file = params['classes_file']
+    use_embeddings = params['use_embeddings']
     embeddings_dim = params['embeddings_dim']
 
     # --- Map functions
@@ -254,7 +255,7 @@ def input_fn(input_data: Union[str, List[str]], params: dict, input_label_dir: s
 
     def fn():
         if not has_labelled_data:
-            if not has_embeddings_data:
+            if not use_embeddings and not has_embeddings_data:
                 encoded_filenames = [f.encode() for f in input_image_filenames]
                 dataset = tf.data.Dataset.from_generator(lambda: tqdm(encoded_filenames, desc=progressbar_description),
                                                          tf.string, tf.TensorShape([]))
@@ -270,7 +271,7 @@ def input_fn(input_data: Union[str, List[str]], params: dict, input_label_dir: s
                 dataset = dataset.map(_load_no_label_embeddings, num_threads)
 
         else:
-            if not has_embeddings_data:
+            if not use_embeddings and not has_embeddings_data:
                 encoded_filenames = [(i.encode(), l.encode()) for i, l in zip(input_image_filenames, label_image_filenames)]
                 dataset = tf.data.Dataset.from_generator(lambda: tqdm(utils.shuffled(encoded_filenames),
                                                                       desc=progressbar_description),
@@ -313,13 +314,20 @@ def input_fn(input_data: Union[str, List[str]], params: dict, input_label_dir: s
             'embeddings': [-1, embeddings_dim],
             'shapes': [2],
         }
+
+        padding_values = {
+            'images': [[[255, 255, 255]]]
+        }
+
+        padding_values = None
+
         if 'labels' in dataset.output_shapes.keys():
             output_shapes_label = dataset.output_shapes['labels']
             padded_shapes['labels'] = base_shape_images + list(output_shapes_label[2:])
         if 'weight_maps' in dataset.output_shapes.keys():
             padded_shapes['weight_maps'] = base_shape_images
 
-        dataset = dataset.padded_batch(batch_size=batch_size, padded_shapes=padded_shapes).prefetch(8)
+        dataset = dataset.padded_batch(batch_size=batch_size, padded_shapes=padded_shapes, padding_values=padding_values).prefetch(8)
         prepared_batch = dataset.make_one_shot_iterator().get_next()
 
         # Summaries for checking that the loading and data augmentation goes fine

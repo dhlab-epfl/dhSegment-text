@@ -327,7 +327,7 @@ def input_fn(input_data: Union[str, List[str]], params: dict, input_label_dir: s
         if 'weight_maps' in dataset.output_shapes.keys():
             padded_shapes['weight_maps'] = base_shape_images
 
-        dataset = dataset.padded_batch(batch_size=batch_size, padded_shapes=padded_shapes, padding_values=padding_values).prefetch(8)
+        dataset = dataset.padded_batch(batch_size=batch_size, padded_shapes=padded_shapes).prefetch(8)
         prepared_batch = dataset.make_one_shot_iterator().get_next()
 
         # Summaries for checking that the loading and data augmentation goes fine

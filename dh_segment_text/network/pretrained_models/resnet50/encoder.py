@@ -44,11 +44,11 @@ class ResnetV1_50(Encoder):
             print('Pre-trained weights downloaded!')
 
     def pretrained_information(self):
-        #return self.pretrained_file, [v for v in tf.global_variables()
-        #                              if 'resnet_v1_50' in v.name
-        #                              and 'renorm' not in v.name]
         return self.pretrained_file, [v for v in tf.global_variables()
-                                      if 'resnet_v1_50' in v.name]
+                                      if 'resnet_v1_50' in v.name
+                                      and 'renorm' not in v.name]
+        #return self.pretrained_file, [v for v in tf.global_variables()
+        #                              if 'resnet_v1_50' in v.name]
 
 
     def __call__(self, images: tf.Tensor, is_training=False,

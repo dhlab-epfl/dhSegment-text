@@ -23,7 +23,7 @@ class ResnetV1_50(Encoder):
     :ivar pretrained_file: path to the file (.ckpt) containing the pretrained weights
     """
     def __init__(self, train_batchnorm: bool=False, blocks: int=4, weight_decay: float=0.0001,
-                 batch_renorm: bool=True, corrected_version: bool=False,
+                 batch_renorm: bool=False, corrected_version: bool=False,
                  concat_level: int=-1):
         self.train_batchnorm = train_batchnorm
         self.blocks = blocks

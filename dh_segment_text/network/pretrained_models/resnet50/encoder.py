@@ -44,9 +44,12 @@ class ResnetV1_50(Encoder):
             print('Pre-trained weights downloaded!')
 
     def pretrained_information(self):
+        #return self.pretrained_file, [v for v in tf.global_variables()
+        #                              if 'resnet_v1_50' in v.name
+        #                              and 'renorm' not in v.name]
         return self.pretrained_file, [v for v in tf.global_variables()
-                                      if 'resnet_v1_50' in v.name
-                                      and 'renorm' not in v.name]
+                                      if 'resnet_v1_50' in v.name]
+
 
     def __call__(self, images: tf.Tensor, is_training=False,
                  embeddings_encoder: Type[EmbeddingsEncoder]=None,
@@ -115,7 +118,8 @@ class ResnetV1_50(Encoder):
                                        embeddings_map=embeddings_map,
                                        concat_level=self.concat_level,
                                        num_classes=None,
-                                       is_training=self.train_batchnorm and is_training,
+                                       #is_training=self.train_batchnorm and is_training,
+                                       is_training=is_training,
                                        global_pool=False,
                                        output_stride=None,
                                        include_root_block=True,

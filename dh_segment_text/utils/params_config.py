@@ -60,10 +60,14 @@ class ModelParams(BaseParams):
     """
     def __init__(self, **kwargs):
         self.encoder_name = kwargs.get('encoder_name', 'dh_segment_text.network.pretrained_models.ResnetV1_50')  # type: str
-        self.encoder_params = kwargs.get('encoder_params', dict())  # type: dict
+        self.encoder_params = kwargs.get('encoder_params', {
+            'weight_decay': 1e-6
+        })  # type: dict
         self.decoder_name = kwargs.get('decoder_name', 'dh_segment_text.network.SimpleDecoder')  # type: str
         self.decoder_params = kwargs.get('decoder_params', {
-            'upsampling_dims': [32, 64, 128, 256, 512]
+            'upsampling_dims': [32, 64, 128, 256, 512],
+            'max_depth': 512,
+            'weight_decay': 1e-6
         })  # type: dict
         self.n_classes = kwargs.get('n_classes', None)  # type: int
 

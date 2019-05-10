@@ -62,7 +62,7 @@ class LoadedModel:
             del self._output_dict['original_shape']
         self.sema = Semaphore(num_parallel_predictions)
 
-    def predict(self, input_tensor, embeddings_path=None, embeddings_map_path=None, prediction_key=None):
+    def predict(self, input_tensor, embeddings_path=None, embeddings_map_path=None, prediction_key=None, embeddings_dim=300):
         """
         Performs the prediction from the loaded model according to the prediction mode. \n
         Prediction modes:
@@ -97,7 +97,7 @@ class LoadedModel:
                     embeddings = np.load(embeddings_path)
                     embeddings_map = sparse.load_npz(embeddings_map_path).toarray()
                 else:
-                    embeddings = np.zeros((1,300), dtype=np.float32)
+                    embeddings = np.zeros((1,embeddings_dim), dtype=np.float32)
                     embeddings_map = np.zeros((200,200), dtype=np.int32)
                 feed_dict['PyFunc:0'] = embeddings
                 feed_dict['PyFunc:1'] = embeddings_map

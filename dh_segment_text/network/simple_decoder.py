@@ -23,7 +23,7 @@ class SimpleDecoder(Decoder):
         renorm = True
         self.batch_norm_params = {
             "renorm": renorm,
-            "renorm_clipping": {'rmax': 100, 'rmin': 0.1, 'dmax': 10},
+            "renorm_clipping": {'rmax': 100, 'rmin': 0.1, 'dmax': 1},
             "renorm_momentum": 0.98
         }
 

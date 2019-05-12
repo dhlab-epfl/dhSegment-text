@@ -46,7 +46,8 @@ class ResnetV1_50(Encoder):
     def pretrained_information(self):
         return self.pretrained_file, [v for v in tf.global_variables()
                                       if 'resnet_v1_50' in v.name
-                                      and 'renorm' not in v.name]
+                                      and 'renorm' not in v.name
+                                      and 'Embeddings' not in v.name]
         #return self.pretrained_file, [v for v in tf.global_variables()
         #                              if 'resnet_v1_50' in v.name]
 

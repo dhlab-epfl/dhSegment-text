@@ -46,13 +46,22 @@ class ResnetV1_50(Encoder):
     def pretrained_information(self):
         if self.concat_level == -1:
             additional_variable = 'randomstring'
+            additional_variable2 = 'randomstring'
         else:
             additional_variable = f"resnet_v1_50/block{self.concat_level+1}/unit_1/bottleneck_v1/conv1"
+            additional_variable2 = f"resnet_v1_50/block{self.concat_level+1}/unit_1/bottleneck_v1/shortcut"
+        print("RESTORING", [v for v in tf.global_variables()
+                                      if 'resnet_v1_50' in v.name
+                                      and 'renorm' not in v.name
+                                      and 'Embeddings' not in v.name
+                                      and additional_variable2 not in v.name
+                                      and additional_variable not in v.name])
         return self.pretrained_file, [v for v in tf.global_variables()
                                       if 'resnet_v1_50' in v.name
                                       and 'renorm' not in v.name
                                       and 'Embeddings' not in v.name
-                                      and additional_variable not in v.name]
+                                      and additional_variable not in v.name
+                                      and additional_variable2 not in v.name]
         #return self.pretrained_file, [v for v in tf.global_variables()
         #                              if 'resnet_v1_50' in v.name]
 

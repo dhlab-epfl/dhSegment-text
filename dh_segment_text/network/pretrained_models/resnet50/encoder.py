@@ -24,13 +24,14 @@ class ResnetV1_50(Encoder):
     """
     def __init__(self, train_batchnorm: bool=False, blocks: int=4, weight_decay: float=0.0001,
                  batch_renorm: bool=False, corrected_version: bool=False,
-                 concat_level: int=-1):
+                 concat_level: int=-1, use_pretraining: bool=True):
         self.train_batchnorm = train_batchnorm
         self.blocks = blocks
         self.weight_decay = weight_decay
         self.batch_renorm = batch_renorm
         self.corrected_version = corrected_version
         self.concat_level = concat_level
+        self.use_pretraining = use_pretraining
         self.pretrained_file = os.path.join(get_data_folder(), 'resnet_v1_50.ckpt')
         if not os.path.exists(self.pretrained_file):
             print("Could not find pre-trained file {}, downloading it!".format(self.pretrained_file))
@@ -44,18 +45,21 @@ class ResnetV1_50(Encoder):
             print('Pre-trained weights downloaded!')
 
     def pretrained_information(self):
-        if self.concat_level == -1:
-            additional_variable = 'randomstring'
-            additional_variable2 = 'randomstring'
+        if self.use_pretraining:
+            if self.concat_level == -1:
+                additional_variable = 'randomstring'
+                additional_variable2 = 'randomstring'
+            else:
+                additional_variable = f"resnet_v1_50/block{self.concat_level+1}/unit_1/bottleneck_v1/conv1"
+                additional_variable2 = f"resnet_v1_50/block{self.concat_level+1}/unit_1/bottleneck_v1/shortcut"
+                return self.pretrained_file, [v for v in tf.global_variables()
+                                              if 'resnet_v1_50' in v.name
+                                              and 'renorm' not in v.name
+                                              and 'Embeddings' not in v.name
+                                              and additional_variable not in v.name
+                                              and additional_variable2 not in v.name]
         else:
-            additional_variable = f"resnet_v1_50/block{self.concat_level+1}/unit_1/bottleneck_v1/conv1"
-            additional_variable2 = f"resnet_v1_50/block{self.concat_level+1}/unit_1/bottleneck_v1/shortcut"
-        return self.pretrained_file, [v for v in tf.global_variables()
-                                      if 'resnet_v1_50' in v.name
-                                      and 'renorm' not in v.name
-                                      and 'Embeddings' not in v.name
-                                      and additional_variable not in v.name
-                                      and additional_variable2 not in v.name]
+            return None, None
         #return self.pretrained_file, [v for v in tf.global_variables()
         #                              if 'resnet_v1_50' in v.name]
 

@@ -13,6 +13,7 @@ import tarfile
 import os
 from tqdm import tqdm
 from random import shuffle
+import random
 
 
 def parse_json(filename):
@@ -39,7 +40,8 @@ def hash_dict(params):
     return sha1(json.dumps(params, sort_keys=True).encode()).hexdigest()
 
 
-def shuffled(l: list) -> list:
+def shuffled(l: list, seed: int) -> list:
+    random.seed(seed)
     ll = l.copy()
     shuffle(ll)
     return ll

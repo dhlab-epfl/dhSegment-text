@@ -48,6 +48,7 @@ def default_config():
 
 @ex.automain
 def run(train_data, eval_data, model_output_dir, gpu, training_params, use_embeddings, embeddings_dim, _config):
+    tf.set_random_seed(_config['seed'])
     # Create output directory
     if not os.path.isdir(model_output_dir):
         os.makedirs(model_output_dir)
@@ -71,7 +72,8 @@ def run(train_data, eval_data, model_output_dir, gpu, training_params, use_embed
     session_config.gpu_options.per_process_gpu_memory_fraction = 0.9
     estimator_config = tf.estimator.RunConfig().replace(session_config=session_config,
                                                         save_summary_steps=10,
-                                                        keep_checkpoint_max=1)
+                                                        keep_checkpoint_max=1,
+                                                        tf_random_seed=_config['seed'])
     estimator = tf.estimator.Estimator(estimator_fn.model_fn, model_dir=model_output_dir,
                                        params=_config, config=estimator_config)
 
@@ -119,7 +121,8 @@ def run(train_data, eval_data, model_output_dir, gpu, training_params, use_embed
                                           image_summaries=True,
                                           params=_config,
                                           num_threads=num_threads,
-                                          progressbar_description="Training".format(i)))
+                                          progressbar_description="Training".format(i),
+                                          seed=_config['seed']))
 
         if eval_data is not None:
             eval_result = estimator.evaluate(input.input_fn(eval_input,
@@ -130,7 +133,9 @@ def run(train_data, eval_data, model_output_dir, gpu, training_params, use_embed
                                                                image_summaries=False,
                                                                params=_config,
                                                                num_threads=num_threads,
-                                                               progressbar_description="Evaluation"))
+                                                               progressbar_description="Evaluation"
+                                                               ))
+
         else:
             eval_result = None
 

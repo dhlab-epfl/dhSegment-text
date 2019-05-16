@@ -19,7 +19,7 @@ class InputCase(Enum):
 
 def input_fn(input_data: Union[str, List[str]], params: dict, input_label_dir: str = None,
              data_augmentation: bool = False, batch_size: int = 5, make_patches: bool = False, num_epochs: int = 1,
-             num_threads: int = 4, image_summaries: bool = False, progressbar_description: str = 'Dataset'):
+             num_threads: int = 4, image_summaries: bool = False, progressbar_description: str = 'Dataset', seed=None):
     """
     Input_fn for estimator
     
@@ -273,7 +273,7 @@ def input_fn(input_data: Union[str, List[str]], params: dict, input_label_dir: s
         else:
             if not use_embeddings and not has_embeddings_data:
                 encoded_filenames = [(i.encode(), l.encode()) for i, l in zip(input_image_filenames, label_image_filenames)]
-                dataset = tf.data.Dataset.from_generator(lambda: tqdm(utils.shuffled(encoded_filenames),
+                dataset = tf.data.Dataset.from_generator(lambda: tqdm(utils.shuffled(encoded_filenames, seed),
                                                                       desc=progressbar_description),
                                                          (tf.string, tf.string), (tf.TensorShape([]), tf.TensorShape([])))
 
@@ -285,7 +285,7 @@ def input_fn(input_data: Union[str, List[str]], params: dict, input_label_dir: s
                 dataset = dataset.map(_assign_color_to_class_id, num_threads)
             else:
                 encoded_filenames = [(f.encode(), e.encode(), m.encode(), l.encode()) for f, e, m, l in zip(input_image_filenames, embeddings_filenames, embeddings_map_filenames, label_image_filenames)]
-                dataset = tf.data.Dataset.from_generator(lambda: tqdm(utils.shuffled(encoded_filenames),
+                dataset = tf.data.Dataset.from_generator(lambda: tqdm(utils.shuffled(encoded_filenames, seed),
                                                                       desc=progressbar_description),
                                                          (tf.string, tf.string, tf.string, tf.string), (tf.TensorShape([]), tf.TensorShape([]), tf.TensorShape([]), tf.TensorShape([])))
                 dataset = dataset.repeat(count=num_epochs)
@@ -343,6 +343,14 @@ def input_fn(input_data: Union[str, List[str]], params: dict, input_label_dir: s
                     label_export = utils.multiclass_to_label_image(label_export, classes_file)
                 tf.summary.image('input/label',
                                  tf.image.resize_images(label_export, shape_summary_img), max_outputs=1)
+            #if 'embeddings_map' in prepared_batch:
+            #    embeddings_map = tf.cast(prepared_batch['embeddings_map'], tf.float32)
+            #    per_batch_max = tf.math.reduce_max(embeddings_map)
+            #    embeddings_map /= per_batch_max
+            #    embeddings_map = tf.expand_dims(embeddings_map, axis=-1)
+            #    tf.summary.image('input/embeddings_map',
+            #                     tf.image.resize_images(embeddings_map, shape_summary_img),
+            #                     max_outputs=1)
             if 'weight_maps' in prepared_batch:
                 tf.summary.image('input/weight_map',
                                  tf.image.resize_images(prepared_batch['weight_maps'][:, :, :, None],

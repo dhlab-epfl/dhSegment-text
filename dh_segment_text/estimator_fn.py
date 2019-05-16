@@ -161,7 +161,7 @@ def model_fn(mode, features, labels, params):
             learning_rate = training_params.learning_rate
         tf.summary.scalar('learning_rate', learning_rate)
         if training_params.adamw_optimizer:
-            optimizer = tf.contrib.opt.AdamWOptimizer(learning_rate=learning_rate, weight_decay=1e-4)
+            optimizer = tf.contrib.opt.AdamWOptimizer(learning_rate=learning_rate, weight_decay=1e-6)
         else:
             optimizer = tf.train.AdamOptimizer(learning_rate)
         with tf.control_dependencies(tf.get_collection(tf.GraphKeys.UPDATE_OPS)):

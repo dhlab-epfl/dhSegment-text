@@ -3,7 +3,7 @@ from .embeddings_utils import batch_resize_and_gather
 import tensorflow as tf
 import numpy as np
 
-class Conv1dEncoder(EmbeddingsEncoder):
+class Conv2dEncoder(EmbeddingsEncoder):
     def __init__(self, target_dim: int, starting_dim: int=256, max_conv: int=-1):
         self.target_dim = target_dim
         self.starting_dim = starting_dim
@@ -15,7 +15,10 @@ class Conv1dEncoder(EmbeddingsEncoder):
 
 
     def __call__(self, embeddings: tf.Tensor, embeddings_map: tf.Tensor, target_shape: tf.Tensor) -> tf.Tensor:
-        with tf.variable_scope("Conv1D_encoder"):
+        with tf.variable_scope("Conv2D_encoder"):
+            embeddings_feature_map = batch_resize_and_gather(embeddings_map,
+                                                             target_shape,
+                                                             embeddings)
             with tf.variable_scope("Encoder"):
                 if self.target_dim >= self.starting_dim:
                     raise IndexError(f"Target dim was bigger than {self.starting_dim}, got {self.target_dim}")
@@ -27,18 +30,5 @@ class Conv1dEncoder(EmbeddingsEncoder):
                                                              target_shape,
                                                              reduced_embeddings)
             embeddings_feature_map.set_shape([None, None, None, self.target_dim])
-            embeddings_feature_map_first_dims = embeddings_feature_map[:,:,:,:3]
-            embeddings_feature_map_first_dims = tf.div(
-                tf.subtract(
-                    embeddings_feature_map_first_dims, 
-                    tf.reduce_min(embeddings_feature_map_first_dims)
-                ), 
-                tf.subtract(
-                    tf.reduce_max(embeddings_feature_map_first_dims), 
-                    tf.reduce_min(embeddings_feature_map_first_dims)
-                )
-            )
-            tf.summary.image('summary/embeddings_encoded', embeddings_feature_map_first_dims, max_outputs=1)
-
         return embeddings_feature_map
 

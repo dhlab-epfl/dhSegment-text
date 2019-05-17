@@ -216,23 +216,23 @@ def input_fn(input_data: Union[str, List[str]], params: dict, input_label_dir: s
 
         embeddings_map.set_shape([None, None])
 
-        #if data_augmentation:
-        #    # Rotation of the original image
-        #    if training_params.data_augmentation_max_rotation > 0:
-        #        with tf.name_scope('random_rotation'):
-        #            rotation_angle = tf.random_uniform([],
-        #                                               -training_params.data_augmentation_max_rotation,
-        #                                               training_params.data_augmentation_max_rotation)
-        #            label_image = rotate_crop(label_image, rotation_angle,
-        #                                      minimum_shape=[(i * 3) // 2 for i in training_params.patch_shape],
-        #                                      interpolation='NEAREST')
-        #            embeddings_map = rotate_crop(tf.expand_dims(embeddings_map, 0), rotation_angle,
-        #                                         minimum_shape=[(i * 3) // 2 for i in training_params.patch_shape],
-        #                                         interpolation='NEAREST')
-        #            embeddings_map = embeddings_map[1:]
-        #            input_image = rotate_crop(input_image, rotation_angle,
-        #                                      minimum_shape=[(i * 3) // 2 for i in training_params.patch_shape],
-        #                                      interpolation='BILINEAR')
+        if data_augmentation:
+            # Rotation of the original image
+            if training_params.data_augmentation_max_rotation > 0:
+                with tf.name_scope('random_rotation'):
+                    rotation_angle = tf.random_uniform([],
+                                                       -training_params.data_augmentation_max_rotation,
+                                                       training_params.data_augmentation_max_rotation)
+                    label_image = rotate_crop(label_image, rotation_angle,
+                                              minimum_shape=[(i * 3) // 2 for i in training_params.patch_shape],
+                                              interpolation='NEAREST')
+                    embeddings_map = rotate_crop(tf.expand_dims(embeddings_map, -1), rotation_angle,
+                                                 minimum_shape=[(i * 3) // 2 for i in training_params.patch_shape],
+                                                 interpolation='NEAREST')
+                    embeddings_map = tf.squeeze(embeddings_map)
+                    input_image = rotate_crop(input_image, rotation_angle,
+                                              minimum_shape=[(i * 3) // 2 for i in training_params.patch_shape],
+                                              interpolation='BILINEAR')
         return input_image, embeddings, embeddings_map, label_image
 
     def _assign_color_to_class_id_embeddings(input_image, embeddings, embeddings_map, label_image):
@@ -343,14 +343,14 @@ def input_fn(input_data: Union[str, List[str]], params: dict, input_label_dir: s
                     label_export = utils.multiclass_to_label_image(label_export, classes_file)
                 tf.summary.image('input/label',
                                  tf.image.resize_images(label_export, shape_summary_img), max_outputs=1)
-            #if 'embeddings_map' in prepared_batch:
-            #    embeddings_map = tf.cast(prepared_batch['embeddings_map'], tf.float32)
-            #    per_batch_max = tf.math.reduce_max(embeddings_map)
-            #    embeddings_map /= per_batch_max
-            #    embeddings_map = tf.expand_dims(embeddings_map, axis=-1)
-            #    tf.summary.image('input/embeddings_map',
-            #                     tf.image.resize_images(embeddings_map, shape_summary_img),
-            #                     max_outputs=1)
+            if 'embeddings_map' in prepared_batch:
+                embeddings_map = tf.cast(prepared_batch['embeddings_map'], tf.float32)
+                per_batch_max = tf.math.reduce_max(embeddings_map)
+                embeddings_map /= per_batch_max
+                embeddings_map = tf.expand_dims(embeddings_map, axis=-1)
+                tf.summary.image('input/embeddings_map',
+                                 tf.image.resize_images(embeddings_map, shape_summary_img),
+                                 max_outputs=1)
             if 'weight_maps' in prepared_batch:
                 tf.summary.image('input/weight_map',
                                  tf.image.resize_images(prepared_batch['weight_maps'][:, :, :, None],

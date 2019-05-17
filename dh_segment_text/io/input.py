@@ -213,8 +213,22 @@ def input_fn(input_data: Union[str, List[str]], params: dict, input_label_dir: s
         input_image = load_and_resize_image(image_filename, 3, new_size)
 
         embeddings, embeddings_map = load_embeddings(embeddings_filename, embeddings_map_filename, embeddings_dim)
-
         embeddings_map.set_shape([None, None])
+
+        embeddings_map = tf.expand_dims(embeddings_map, axis=-1)
+        input_shape = tf.cast(tf.shape(embeddings_map)[:2], tf.float32)
+        size = tf.cast(new_size, tf.float32)
+        # Compute new shape
+        # We want X/Y = x/y and we have size = x*y so :
+        ratio = tf.div(input_shape[1], input_shape[0])
+        new_height = tf.sqrt(tf.div(size, ratio))
+        new_width = tf.div(size, new_height)
+        new_shape = tf.cast([new_height, new_width], tf.int32)
+        embeddings_map = tf.image.resize_images(embeddings_map, new_shape, method=tf.image.ResizeMethod.NEAREST_NEIGHBOR)
+        embeddings_map = tf.squeeze(embeddings_map)
+        embeddings_map.set_shape([None, None])
+
+
 
         if data_augmentation:
             # Rotation of the original image

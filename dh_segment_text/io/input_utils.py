@@ -193,7 +193,7 @@ def load_embeddings(embeddings_filename, embeddings_map_filename, embeddings_siz
             embeddings_map = sparse.load_npz(embeddings_map_filename).toarray().astype(np.int32)
         else:
             embeddings = np.zeros((1,embeddings_size), dtype=np.float32)
-            embeddings_map = np.zeros((200,200), dtype=np.int32)
+            embeddings_map = np.zeros((1430,1000), dtype=np.int32)
         return embeddings, embeddings_map
     embeddings, embeddings_map = tf.py_func(load_embeddings, [embeddings_filename, embeddings_map_filename], (tf.float32, tf.int32))
     embeddings.set_shape([None, embeddings_size])

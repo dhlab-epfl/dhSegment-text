@@ -78,7 +78,7 @@ class ResnetV1_50(Encoder):
             mean_substracted_tensor = mean_substraction(images)
             if self.concat_level == 100:
                 with tf.variable_scope('Embeddings'):
-                    embeddings_features = embeddings_encoder(embeddings, embeddings_map, tf.shape(out_tensor)[1:3])
+                    embeddings_features = embeddings_encoder(embeddings, embeddings_map, tf.shape(mean_substracted_tensor)[1:3])
                     in_tensor = tf.concat([mean_substracted_tensor, embeddings_features], axis=-1)
             else:
                 in_tensor = mean_substracted_tensor

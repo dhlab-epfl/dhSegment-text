@@ -69,6 +69,11 @@ class SimpleDecoder(Decoder):
                                                num_outputs=self.upsampling_dims[i],
                                                kernel_size=[3, 3],
                                                scope="conv_{}".format(i))
+                if self.concat_level == 100:
+                    with tf.variable_scope('Embeddings'):
+                        embeddings_features = embeddings_encoder(embeddings, embeddings_map, tf.shape(out_tensor)[1:3])
+                        out_tensor = tf.concat([out_tensor, embeddings_features], axis=-1)
+
 
             logits = layers.conv2d(inputs=out_tensor,
                                    num_outputs=num_classes,

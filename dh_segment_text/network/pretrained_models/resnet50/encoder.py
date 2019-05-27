@@ -49,6 +49,9 @@ class ResnetV1_50(Encoder):
             if self.concat_level == -1:
                 additional_variable = 'randomstring'
                 additional_variable2 = 'randomstring'
+            elif self.concat_level == 100:
+                additional_variable = 'resnet_v1_50/conv1'
+                additional_variable2 = 'randomstring'
             else:
                 additional_variable = f"resnet_v1_50/block{self.concat_level+1}/unit_1/bottleneck_v1/conv1"
                 additional_variable2 = f"resnet_v1_50/block{self.concat_level+1}/unit_1/bottleneck_v1/shortcut"
@@ -73,6 +76,13 @@ class ResnetV1_50(Encoder):
         with slim.arg_scope(resnet_arg_scope(weight_decay=self.weight_decay, batch_norm_decay=0.999)), \
              slim.arg_scope([layers.batch_norm], renorm_decay=0.95, renorm=self.batch_renorm):
             mean_substracted_tensor = mean_substraction(images)
+            if self.concat_level == 100:
+                with tf.variable_scope('Embeddings'):
+                    embeddings_features = embeddings_encoder(embeddings, embeddings_map, tf.shape(out_tensor)[1:3])
+                    in_tensor = tf.concat([mean_substracted_tensor, embeddings_features], axis=-1)
+            else:
+                in_tensor = mean_substracted_tensor
+
             assert 0 < self.blocks <= 4
 
             if self.corrected_version:
@@ -124,7 +134,7 @@ class ResnetV1_50(Encoder):
                     'resnet_v1_50/block3/unit_5/bottleneck_v1',
                     'resnet_v1_50/block4/unit_3/bottleneck_v1'
                 ]
-            net, endpoints = resnet_v1(mean_substracted_tensor,
+            net, endpoints = resnet_v1(in_tensor,
                                        blocks=blocks_list[:self.blocks],
                                        embeddings_encoder=embeddings_encoder,
                                        embeddings=embeddings,
@@ -140,7 +150,10 @@ class ResnetV1_50(Encoder):
                                        scope='resnet_v1_50')
 
             # Add standardized original images
-            outputs.append(mean_substracted_tensor/127.0)
+            if self.concat_level != 100:
+                outputs.append(mean_substracted_tensor/127.0)
+            else:
+                outputs.append(tf.concat([mean_substracted_tensor/127.0, embeddings_features], axis=-1)
 
             for d in desired_endpoints[:self.blocks + 1]:
                 outputs.append(endpoints[d])

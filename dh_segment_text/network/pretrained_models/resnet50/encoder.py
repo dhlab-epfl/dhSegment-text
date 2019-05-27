@@ -153,7 +153,7 @@ class ResnetV1_50(Encoder):
             if self.concat_level != 100:
                 outputs.append(mean_substracted_tensor/127.0)
             else:
-                outputs.append(tf.concat([mean_substracted_tensor/127.0, embeddings_features], axis=-1)
+                outputs.append(tf.concat([mean_substracted_tensor/127.0, embeddings_features], axis=-1))
 
             for d in desired_endpoints[:self.blocks + 1]:
                 outputs.append(endpoints[d])

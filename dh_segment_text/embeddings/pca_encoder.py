@@ -4,7 +4,7 @@ import tensorflow as tf
 import numpy as np
 
 class PCAEncoder(EmbeddingsEncoder):
-    def __init__(self, pca_mean_path: str, pca_components_path: str, target_dim: int):
+    def __init__(self, pca_mean_path: str, pca_components_path: str, target_dim: int, is_training: bool=False):
         self.pca_mean = tf.constant(np.load(pca_mean_path), dtype=tf.float32)
         self.pca_components = tf.constant(np.load(pca_components_path), dtype=tf.float32)
         self.target_dim = target_dim

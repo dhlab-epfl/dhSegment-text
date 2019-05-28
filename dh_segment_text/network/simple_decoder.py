@@ -63,7 +63,7 @@ class SimpleDecoder(Decoder):
                     out_tensor = _upsample_concat(out_tensor, f_map, scope_name='upsample_{}'.format(i))
                     if i == self.concat_level:
                         with tf.variable_scope('Embeddings'):
-                            embeddings_features = embeddings_encoder(embeddings, embeddings_map, tf.shape(out_tensor)[1:3])
+                            embeddings_features = embeddings_encoder(embeddings, embeddings_map, tf.shape(out_tensor)[1:3], is_training)
                             out_tensor = tf.concat([out_tensor, embeddings_features], axis=-1)
                     out_tensor = layers.conv2d(inputs=out_tensor,
                                                num_outputs=self.upsampling_dims[i],
@@ -71,7 +71,7 @@ class SimpleDecoder(Decoder):
                                                scope="conv_{}".format(i))
                 if self.concat_level == 100:
                     with tf.variable_scope('Embeddings'):
-                        embeddings_features = embeddings_encoder(embeddings, embeddings_map, tf.shape(out_tensor)[1:3])
+                        embeddings_features = embeddings_encoder(embeddings, embeddings_map, tf.shape(out_tensor)[1:3], is_training)
                         out_tensor = tf.concat([out_tensor, embeddings_features], axis=-1)
 
 

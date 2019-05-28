@@ -4,5 +4,5 @@ from typing import List
 
 class EmbeddingsEncoder(ABC):
     @abstractmethod
-    def __call__(self, embeddings: tf.Tensor, embeddings_map: tf.Tensor, target_shape: tf.Tensor, target_dim: int) -> tf.Tensor:
+    def __call__(self, embeddings: tf.Tensor, embeddings_map: tf.Tensor, target_shape: tf.Tensor, target_dim: int, is_training: bool=False) -> tf.Tensor:
         pass

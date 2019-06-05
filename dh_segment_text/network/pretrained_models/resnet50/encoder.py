@@ -1,6 +1,7 @@
 from tensorflow.contrib import slim, layers
 import tensorflow as tf
 from ...model import Encoder
+from ...utils import GroupNorm
 import os
 import tarfile
 from ....utils.misc import get_data_folder, download_file
@@ -58,6 +59,7 @@ class ResnetV1_50(Encoder):
             return self.pretrained_file, [v for v in tf.global_variables()
                                           if 'resnet_v1_50' in v.name
                                           and 'renorm' not in v.name
+                                          and 'group_norm' not in v.name
                                           and 'Embeddings' not in v.name
                                           and additional_variable not in v.name
                                           and additional_variable2 not in v.name]

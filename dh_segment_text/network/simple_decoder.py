@@ -32,8 +32,10 @@ class SimpleDecoder(Decoder):
                  embeddings: tf.Tensor=tf.zeros((1,300), dtype=tf.float32),
                  embeddings_map: tf.Tensor=tf.zeros((200,200), dtype=tf.int32)):
 
-        batch_norm_fn = lambda x: tf.layers.batch_normalization(x, axis=-1, training=is_training,
-                                                                name='batch_norm', **self.batch_norm_params)
+        #batch_norm_fn = lambda x: tf.layers.batch_normalization(x, axis=-1, training=is_training,
+                                                                #name='batch_norm', **self.batch_norm_params)
+
+        batch_norm_fn = lambda x: tf.contrib.layers.batch_norm(x, renorm_decay=0.99, renorm=True, renorm_clipping= {'rmax': 100, 'rmin': 0.1, 'dmax': 1})
 
         # Upsampling
         with tf.variable_scope('SimpleDecoder'):

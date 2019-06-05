@@ -41,7 +41,7 @@ def input_fn(input_data: Union[str, List[str]], params: dict, input_label_dir: s
     classes_file = params['classes_file']
     use_embeddings = params['use_embeddings']
     embeddings_dim = params['embeddings_dim']
-    fix_augment = params['fix_augment']
+    fix_augment = params['seed_augment']
 
     if fix_augment:
         seed_augment = seed

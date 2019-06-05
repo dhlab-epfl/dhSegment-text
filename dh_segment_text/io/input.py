@@ -98,7 +98,7 @@ def input_fn(input_data: Union[str, List[str]], params: dict, input_label_dir: s
         if make_patches:
             # Offsets for patch extraction
             offsets = (tf.random_uniform(shape=[], minval=0, maxval=1, dtype=tf.float32, seed=seed),
-                       tf.random_uniform(shape=[], minval=0, maxval=1, dtype=tf.float32), seed=seed)
+                       tf.random_uniform(shape=[], minval=0, maxval=1, dtype=tf.float32, seed=seed))
             # offsets = (0, 0)
             batch_image, batch_label = _make_patches_fn(input_image, label_image, offsets)
         else:

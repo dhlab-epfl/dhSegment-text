@@ -1,7 +1,6 @@
 from tensorflow.contrib import slim, layers
 import tensorflow as tf
 from ...model import Encoder
-from ...utils import GroupNorm
 import os
 import tarfile
 from ....utils.misc import get_data_folder, download_file

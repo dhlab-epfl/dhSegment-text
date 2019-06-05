@@ -35,7 +35,7 @@ class SimpleDecoder(Decoder):
         #batch_norm_fn = lambda x: tf.layers.batch_normalization(x, axis=-1, training=is_training,
                                                                 #name='batch_norm', **self.batch_norm_params)
 
-        batch_norm_fn = lambda x: tf.contrib.layers.batch_norm(x, renorm_decay=0.99, renorm=True, renorm_clipping= {'rmax': 100, 'rmin': 0.1, 'dmax': 1})
+        batch_norm_fn = lambda x: tf.contrib.layers.batch_norm(x, scale=True, renorm_decay=0.99, renorm=True, renorm_clipping= {'rmax': 100, 'rmin': 0.1, 'dmax': 1})
 
         # Upsampling
         with tf.variable_scope('SimpleDecoder'):

@@ -31,6 +31,7 @@ def default_config():
     classes_file = None  # txt file with classes values (unused for REGRESSION)
     gpu = ''  # GPU to be used for training
     use_embeddings = False
+    weights_histogram = False
     embeddings_dim = 300
     prediction_type = utils.PredictionType.CLASSIFICATION  # One of CLASSIFICATION, REGRESSION or MULTILABEL
     model_params = utils.ModelParams().to_dict()  # Model parameters

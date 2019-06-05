@@ -11,6 +11,7 @@ def model_fn(mode, features, labels, params):
     prediction_type = params['prediction_type']
     classes_file = params['classes_file']
     use_embeddings = params['use_embeddings']
+    weights_histogram = params['weights_histogram']
 
     input_images = features['images']
 
@@ -46,6 +47,9 @@ def model_fn(mode, features, labels, params):
                                  embeddings_encoder=embeddings_encoder,
                                  embeddings=input_embeddings,
                                  embeddings_map=input_embeddings_map)
+    if weights_histogram:
+        for var in tf.trainable_variables():
+            tf.summary.histogram(var.name, var)
 
 
     if mode == tf.estimator.ModeKeys.TRAIN:

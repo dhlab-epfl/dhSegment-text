@@ -36,12 +36,17 @@ def input_fn(input_data: Union[str, List[str]], params: dict, input_label_dir: s
     :param progressbar_description: what will appear in the progressbar showing the number of files read
     :return: fn
     """
-    tf.random.set_random_seed(seed)
     training_params = utils.TrainingParams.from_dict(params['training_params'])
     prediction_type = params['prediction_type']
     classes_file = params['classes_file']
     use_embeddings = params['use_embeddings']
     embeddings_dim = params['embeddings_dim']
+    fix_augment = params['fix_augment']
+
+    if fix_augment:
+        seed_augment = seed
+    else:
+        seed_augment = None
 
     # --- Map functions
     def _make_patches_fn(input_image: tf.Tensor, label_image: tf.Tensor, offsets: tuple) -> (tf.Tensor, tf.Tensor):
@@ -66,7 +71,7 @@ def input_fn(input_data: Union[str, List[str]], params: dict, input_label_dir: s
         if training_params.data_augmentation and training_params.input_resized_size > 0:
             random_scaling = tf.random_uniform([],
                                                np.maximum(1 - training_params.data_augmentation_max_scaling, 0),
-                                               1 + training_params.data_augmentation_max_scaling)
+                                               1 + training_params.data_augmentation_max_scaling, seed=seed_augment)
             new_size = training_params.input_resized_size * random_scaling
         else:
             new_size = training_params.input_resized_size
@@ -88,7 +93,7 @@ def input_fn(input_data: Union[str, List[str]], params: dict, input_label_dir: s
                 with tf.name_scope('random_rotation'):
                     rotation_angle = tf.random_uniform([],
                                                        -training_params.data_augmentation_max_rotation,
-                                                       training_params.data_augmentation_max_rotation)
+                                                       training_params.data_augmentation_max_rotation, seed=seed_augment)
                     label_image = rotate_crop(label_image, rotation_angle,
                                               minimum_shape=[(i * 3) // 2 for i in training_params.patch_shape],
                                               interpolation='NEAREST')
@@ -98,8 +103,8 @@ def input_fn(input_data: Union[str, List[str]], params: dict, input_label_dir: s
 
         if make_patches:
             # Offsets for patch extraction
-            offsets = (tf.random_uniform(shape=[], minval=0, maxval=1, dtype=tf.float32),
-                       tf.random_uniform(shape=[], minval=0, maxval=1, dtype=tf.float32))
+            offsets = (tf.random_uniform(shape=[], minval=0, maxval=1, dtype=tf.float32, seed=seed_augment),
+                       tf.random_uniform(shape=[], minval=0, maxval=1, dtype=tf.float32, seed=seed_augment)
             # offsets = (0, 0)
             batch_image, batch_label = _make_patches_fn(input_image, label_image, offsets)
         else:
@@ -201,7 +206,7 @@ def input_fn(input_data: Union[str, List[str]], params: dict, input_label_dir: s
         if training_params.data_augmentation and training_params.input_resized_size > 0:
             random_scaling = tf.random_uniform([],
                                                np.maximum(1 - training_params.data_augmentation_max_scaling, 0),
-                                               1 + training_params.data_augmentation_max_scaling)
+                                               1 + training_params.data_augmentation_max_scaling, seed=seed_augment)
             new_size = training_params.input_resized_size * random_scaling
         else:
             new_size = training_params.input_resized_size
@@ -237,7 +242,7 @@ def input_fn(input_data: Union[str, List[str]], params: dict, input_label_dir: s
                 with tf.name_scope('random_rotation'):
                     rotation_angle = tf.random_uniform([],
                                                        -training_params.data_augmentation_max_rotation,
-                                                       training_params.data_augmentation_max_rotation)
+                                                       training_params.data_augmentation_max_rotation, seed=seed_augment)
                     label_image = rotate_crop(label_image, rotation_angle,
                                               minimum_shape=[(i * 3) // 2 for i in training_params.patch_shape],
                                               interpolation='NEAREST')

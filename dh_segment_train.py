@@ -32,6 +32,7 @@ def default_config():
     gpu = ''  # GPU to be used for training
     use_embeddings = False
     weights_histogram = False
+    seed_augment = False
     embeddings_dim = 300
     prediction_type = utils.PredictionType.CLASSIFICATION  # One of CLASSIFICATION, REGRESSION or MULTILABEL
     model_params = utils.ModelParams().to_dict()  # Model parameters

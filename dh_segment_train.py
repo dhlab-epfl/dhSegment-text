@@ -10,6 +10,7 @@ tf.logging.set_verbosity(WARNING)
 from dh_segment_text import estimator_fn, utils
 from dh_segment_text.io import input
 import json
+from pathlib import Path
 
 try:
     import better_exceptions
@@ -113,6 +114,14 @@ def run(train_data, eval_data, model_output_dir, gpu, training_params, use_embed
     else:
         num_threads = 4
 
+    Path(estimator.eval_dir()).mkdir(parents=True, exist_ok=True)
+    early_stop_hook = tf.contrib.estimator.stop_if_no_increase_hook(
+        estimator,
+        'eval/mIOU',
+        2000,
+        run_every_secs=1800
+    )
+
     for i in trange(0, training_params.n_epochs, training_params.evaluate_every_epoch, desc='Evaluated epochs'):
         estimator.train(input.input_fn(train_input,
                                           input_label_dir=train_labels_input,
@@ -124,7 +133,9 @@ def run(train_data, eval_data, model_output_dir, gpu, training_params, use_embed
                                           params=_config,
                                           num_threads=num_threads,
                                           progressbar_description="Training".format(i),
-                                          seed=_config['seed']))
+                                          seed=_config['seed']),
+                        hooks = [early_stop_hook]
+        )
 
         if eval_data is not None:
             eval_result = estimator.evaluate(input.input_fn(eval_input,

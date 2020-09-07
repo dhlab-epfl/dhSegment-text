@@ -1,37 +1,26 @@
-# dhSegment
+# dhSegment text
 
-[![Documentation Status](https://readthedocs.org/projects/dhsegment/badge/?version=latest)](https://dhsegment.readthedocs.io/en/latest/?badge=latest)
+This a fork of the original [dhSegment repository](https://github.com/dhlab-epfl/dhSegment). It contains the code used for the experiments of the paper:
 
-**dhSegment** is a tool for Historical Document Processing. Its generic approach allows to segment regions and
-extract content from different type of documents. See 
-[some examples here](https://dhsegment.readthedocs.io/en/latest/intro.html#use-cases).
-
-The complete description of the system can be found in the corresponding [paper](https://arxiv.org/abs/1804.10371).
-
-It was created by [Benoit Seguin](https://twitter.com/Seguin_Be) and Sofia Ares Oliveira at DHLAB, EPFL.
-
-## Installation and usage
-The [installation procedure](https://dhsegment.readthedocs.io/en/latest/start/install.html) 
-and examples of usage can be found in the documentation (see section below).
-
-## Demo
-Have a try at the [demo](https://dhsegment.readthedocs.io/en/latest/start/demo.html) to train (optional) and apply dhSegment in page extraction using the `demo.py` script.
-
-## Documentation
-
-*Under construction*
-
-The documentation is available on [readthedocs](https://dhsegment.readthedocs.io/).
-
-##
-If you are using this code for your research, you can cite the corresponding paper as :
 ```
-@inproceedings{oliveiraseguinkaplan2018dhsegment,
-  title={dhSegment: A generic deep-learning approach for document segmentation},
-  author={Ares Oliveira, Sofia and Seguin, Benoit and Kaplan, Frederic},
-  booktitle={Frontiers in Handwriting Recognition (ICFHR), 2018 16th International Conference on},
-  pages={7--12},
-  year={2018},
-  organization={IEEE}
-}
+Barman, Raphaël, Ehrmann, Maud, Clematide, Simon, Ares Oliveira, Sofia, and Kaplan, Frédéric  (2020).
+Combining Visual and Textual Features for Semantic Segmentation of Historical Newspapers.
+Journal of Data Mining and Digital Humanities. https://arxiv.org/abs/2002.06144
 ```
+
+## Modifications
+
+The following modifications were made:
+
+- Changing the input pipeline to read embeddings
+- Creation of embeddings maps with several dimensionality reduction algorithms
+- Concatenation of the embeddings map inside the encoder or decoder
+
+## Usage
+For general usage of dhSegment, see the [original documentation](https://dhsegment.readthedocs.io/).
+
+- The csv file now needs four columns: image, label, embeddings, embeddings_map.
+- Different configuration options were added for choosing the different hyperparamters and can be found in `dh_segment_text/utils/params_config.py` and in the encoder and decoder.
+- An example config can be found under `embeddings_config.json`.
+
+The training can be launched using the trainer script with `python dh_segment_train.py with /path/to/config.json`.

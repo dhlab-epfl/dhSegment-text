@@ -1,0 +1,49 @@
+{
+    "train_data": "/path/to/train.csv",
+    "eval_data": "/path/to/val.csv",
+    "model_output_dir": "/path/to/model_output",
+    "restore_model": true,
+    "classes_file": "/path/to/classes.txt",
+    "gpu": "0",
+    "use_embeddings": true,
+    "embeddings_dim": 300,
+    "prediction_type": "CLASSIFICATION",
+    "model_params": {
+        "encoder_name": "dh_segment_text.network.pretrained_models.ResnetV1_50",
+        "encoder_params": {
+            "concat_level": 0,
+            "weight_decay": 1e-06
+        },
+        "decoder_name": "dh_segment_text.network.SimpleDecoder",
+        "decoder_params": {
+            "upsampling_dims": [32, 64, 128, 256, 512],
+            "max_depth": 2348,
+            "weight_decay": 1e-06
+        },
+        "n_classes": 5
+    },
+    "embeddings_params": {
+        "target_dim": 300,
+        "encoder_name": "dh_segment_text.embeddings.PCAEncoder",
+        "encoder_params": {
+            "pca_components_path": "/path/to/pca_std.npy",
+            "pca_mean_path": "/path/to/pca_mean.npy"
+        }
+    },
+    "training_params": {
+        "n_epochs": 50,
+        "evaluate_every_epoch": 10,
+        "learning_rate": 0.0001,
+        "exponential_learning": true,
+        "batch_size": 4,
+        "data_augmentation": true,
+        "data_augmentation_flip_lr": false,
+        "data_augmentation_flip_ud": false,
+        "data_augmentation_color": false,
+        "data_augmentation_max_rotation": 0.01,
+        "data_augmentation_max_scaling": 0.2,
+        "make_patches": false,
+        "input_resized_size": 500000.0,
+        "training_margin": 0
+    }
+}

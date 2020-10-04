@@ -1,4 +1,4 @@
-#### What to find here
+## What to find here:
 
 **Datasets and models** related to the experiments on combining textual and visual features for newspaper article segmentation.
 

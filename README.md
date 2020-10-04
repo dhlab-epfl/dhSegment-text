@@ -43,3 +43,7 @@ Barman Raphaël, Ehrmann Maud, Clematide Simon, Ares Oliveira Sofia, Kaplan Fré
     primaryClass = {cs.CV},
 }
 ```
+
+## Background
+
+This work was carried out in the frame of the master thesis of Raphaël Barman, within the context of the ['impresso - Media Monitoring of the Past'](https://impresso-project.ch) project (SNSF Sinergia grant [CRSII5_173719](http://p3.snf.ch/project-173719)).

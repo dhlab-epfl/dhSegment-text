@@ -23,7 +23,7 @@ The training can be launched using the trainer script with `python dh_segment_tr
 ## Data & Models
 
 Datasets and best models of experiments with newspaper article segmentation are available in the `data` folder. 
-See this [README](https://github.com/dhlab-epfl/dhSegment-text/tree/master/data)
+See this [README](https://github.com/dhlab-epfl/dhSegment-text/tree/master/data).
 
 **Pay attention to the terms of use of the material.**
 
@@ -48,4 +48,6 @@ Please cite this paper if you are using the tool/datasets or find it relevant to
 
 ## Background
 
-This work was carried out in the frame of the master thesis of Raphaël Barman, within the context of the ['impresso - Media Monitoring of the Past'](https://impresso-project.ch) project (SNSF Sinergia grant [CRSII5_173719](http://p3.snf.ch/project-173719)).
+This work was carried out in the frame of the master thesis of Raphaël Barman, within the context of the ['*impresso* - Media Monitoring of the Past'](https://impresso-project.ch) project (SNSF Sinergia grant [CRSII5_173719](http://p3.snf.ch/project-173719)).
+
+

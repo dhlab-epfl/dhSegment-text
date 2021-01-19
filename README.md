@@ -7,26 +7,30 @@ This a fork of the original [dhSegment repository](https://github.com/dhlab-epfl
 
 The following modifications were made:
 
-- Changing the input pipeline to read embeddings
-- Creation of embeddings maps with several dimensionality reduction algorithms
-- Concatenation of the embeddings map inside the encoder or decoder
+- Changing the input pipeline to read embeddings;
+- Creation of embeddings maps with several dimensionality reduction algorithms;
+- Concatenation of the embeddings map inside the encoder or decoder.
 
 ## Usage
 For general usage of dhSegment, see the [original documentation](https://dhsegment.readthedocs.io/).
 
 - The csv file now needs four columns: image, label, embeddings, embeddings_map.
-- Different configuration options were added for choosing the different hyperparamters and can be found in `dh_segment_text/utils/params_config.py` and in the encoder and decoder.
+- Different configuration options were added for choosing the different hyperparameters and can be found in `dh_segment_text/utils/params_config.py` and in the encoder and decoder.
 - An example config can be found under `embeddings_config.json`.
 
 The training can be launched using the trainer script with `python dh_segment_train.py with /path/to/config.json`.
 
 ## Data & Models
+
 Datasets and best models of experiments with newspaper article segmentation are available in the `data` folder. 
-Pay attention to the terms of use of the material.
+See this [README](https://github.com/dhlab-epfl/dhSegment-text/tree/master/data)
+
+**Pay attention to the terms of use of the material.**
 
 ## Paper
 
-Please cite this paper if you are using the tool/datasets or find it relevant to your research:    
+Please cite this paper if you are using the tool/datasets or find it relevant to your research:  
+
 [*Combining Visual and Textual Features for Semantic Segmentation of Historical Newspapers*](https://infoscience.epfl.ch/record/282863?&ln=en). Barman Raphaël, Ehrmann Maud, Clematide Simon, Ares Oliveira Sofia, Kaplan Frédéric. 
 
 
@@ -40,7 +44,6 @@ Please cite this paper if you are using the tool/datasets or find it relevant to
     year = {2021},
     url = {https://jdmdh.episciences.org/7097},
 }
-
 ```
 
 ## Background

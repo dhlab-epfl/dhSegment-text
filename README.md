@@ -3,8 +3,6 @@
 This a fork of the original [dhSegment repository](https://github.com/dhlab-epfl/dhSegment), developed to carry out experiments on combining visual and textual features (see paper reference below).
 
 
-
-
 ## Modifications
 
 The following modifications were made:
@@ -27,21 +25,22 @@ Datasets and best models of experiments with newspaper article segmentation are 
 Pay attention to the terms of use of the material.
 
 ## Paper
-Barman Raphaël, Ehrmann Maud, Clematide Simon, Ares Oliveira Sofia, Kaplan Frédéric (to appear in Autumn 2020). *Combining Visual and Textual Features for Semantic Segmentation of Historical Newspapers*, Journal of Data Mining and Digital Humanities. [https://arxiv.org/abs/2002.06144](https://arxiv.org/abs/2002.06144)
 
-**Bibtex** (will be sooon updated)
+Please cite this paper if you are using the tool/datasets or find it relevant to your research:    
+[*Combining Visual and Textual Features for Semantic Segmentation of Historical Newspapers*](https://infoscience.epfl.ch/record/282863?&ln=en). Barman Raphaël, Ehrmann Maud, Clematide Simon, Ares Oliveira Sofia, Kaplan Frédéric. 
+
+
 ```
 @article{barman_combining_2020,
     title = {{Combining Visual and Textual Features for Semantic Segmentation of Historical Newspapers}},
     author = {Raphaël Barman and Maud Ehrmann and Simon Clematide and Sofia Ares Oliveira and Frédéric Kaplan},
-    journal= {Journal of Data Mining and Digital Humanities},
-    volume= {tbu}
-    month = {tbu} 
-    year = {2020},
-    eprint = {2002.06144},
-    archivePrefix = {arXiv},
-    primaryClass = {cs.CV},
+    journal= {Journal of Data Mining \& Digital Humanities},
+    volume= {HistoInformatics}
+    DOI = {10.5281/zenodo.4065271},
+    year = {2021},
+    url = {https://jdmdh.episciences.org/7097},
 }
+
 ```
 
 ## Background

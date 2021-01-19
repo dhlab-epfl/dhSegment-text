@@ -1,4 +1,4 @@
-#### What to find here
+## About:
 
 **Datasets and models** related to the experiments on combining textual and visual features for newspaper article segmentation.
 
@@ -9,6 +9,10 @@ More precisely:
 - **trained-models**: contains some of the best models, as described in the corresponding paper. Available under a [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) license.
 
 **Zenodo record:** (upcoming) 10.5281/zenodo.4065271
+
+## Acknowledgements:
+
+We warmly thank the journal [Le Temps](https://letemps.ch) (owner of *La Gazette de Lausanne* and the *Journal de Genève*) and the group [ArcInfo](https://www.arcinfo.ch/) (owner of *L'Impartial*) for accepting to share the related datasets for academic purposes. We also thank the [National Library of Luxembourg](https://bnl.public.lu/fr.html) for its work and support with all steps related to the *Luxemburger Wort* annotation release.
 
   
 

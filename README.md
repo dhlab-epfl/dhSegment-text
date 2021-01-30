@@ -53,10 +53,10 @@ Some of the best models are released as assets of the current Github [release](h
 Those models can be used to predict probabilities on new images using the same code as in the original dhSegment repository.
 One needs to adjust three parameters to the `predict` function: 1)  `embeddings_path` (the path to the embeddings list), 2) `embeddings_map_path`(the path to the compressed embedding map), and 3) `embeddings_dim` (the size of the embeddings).
 
-Models are available under a [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) license.  
-Please refer to the paper (see below) for further information or contact us.
+Models are available under a [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) license. Please refer to the paper (see below) for further information or contact us.
 
-**DOI data and models: **
+**DOI data and models:**
+
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3706863.svg)](https://doi.org/10.5281/zenodo.3706863)
 
 
@@ -78,7 +78,8 @@ Please cite this paper if you are using the tool/datasets or find it relevant to
     url = {https://jdmdh.episciences.org/7097},
 }
 ```
-**DOI paper:** 
+**DOI paper:**  
+
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4065271.svg)](https://doi.org/10.5281/zenodo.4065271)
 
 

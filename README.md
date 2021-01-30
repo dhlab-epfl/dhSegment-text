@@ -22,9 +22,6 @@ The training can be launched using the trainer script with `python dh_segment_tr
 
 ## 3. Data & Models
 
-Datasets and best models of experiments with newspaper article segmentation are available in the `data` folder. 
-See this [README](https://github.com/dhlab-epfl/dhSegment-text/tree/master/data).
-
 **Pay attention to the terms of use of the material.**
 
 ### 3.1 Data
@@ -59,7 +56,8 @@ One needs to adjust three parameters to the `predict` function: 1)  `embeddings_
 Models are available under a [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) license.  
 Please refer to the paper (see below) for further information or contact us.
 
-DOI data and models: [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3706863.svg)](https://doi.org/10.5281/zenodo.3706863)
+**DOI data and models: **
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3706863.svg)](https://doi.org/10.5281/zenodo.3706863)
 
 
 ## 4. Paper
@@ -80,7 +78,9 @@ Please cite this paper if you are using the tool/datasets or find it relevant to
     url = {https://jdmdh.episciences.org/7097},
 }
 ```
-DOI paper: [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4065271.svg)](https://doi.org/10.5281/zenodo.4065271)
+**DOI paper:** 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4065271.svg)](https://doi.org/10.5281/zenodo.4065271)
+
 
 ## 5. Background & Acknowledgements
 

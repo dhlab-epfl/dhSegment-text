@@ -1,6 +1,6 @@
 # dhSegment text
 
-This a fork of the original [dhSegment repository](https://github.com/dhlab-epfl/dhSegment), developed to carry out experiments on combining visual and textual features published in the paper *Combining Visual and Textual Features for Semantic Segmentation of Historical Newspapers*.
+This a fork of the original [dhSegment repository](https://github.com/dhlab-epfl/dhSegment), developed to carry out experiments on combining visual and textual features published in the paper **Combining Visual and Textual Features for Semantic Segmentation of Historical Newspapers** (see reference below).
 
 
 ## 1. Modifications
